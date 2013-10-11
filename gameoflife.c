@@ -15,17 +15,7 @@ int main(int argc, char **argv)
     LifeWorld_t *pWorldBackBuffer = NewLifeWorld(32, 32);
     LifeWorld_t *pWorldFrontBuffer = NewLifeWorld(32, 32);
 
-    //init an r-pentomino
-    SetCellState(6, 7, pWorldFrontBuffer, 1);
-    SetCellState(7, 8, pWorldFrontBuffer, 1);
-    SetCellState(7, 7, pWorldFrontBuffer, 1);
-    SetCellState(7, 6, pWorldFrontBuffer, 1);
-    SetCellState(8, 6, pWorldFrontBuffer, 1);
-
-    //and some blocks to make sure the world is toroidal
-    SetCellState(0, 0, pWorldFrontBuffer, 1);
-    SetCellState(0, 1, pWorldFrontBuffer, 1);
-    SetCellState(0, 2, pWorldFrontBuffer, 1);
+    RandomizeWorldStateBinary(pWorldFrontBuffer, SDL_GetTicks());
 
     char gameRunning = 1;
     unsigned long generations = 0;
@@ -122,6 +112,22 @@ LifeWorldCell_t GetCellState(long x, long y, LifeWorld_t *world)
 void SetCellState(long x, long y, LifeWorld_t *world, LifeWorldCell_t state)
 {
   world->world[(y * world->width) + x] = state;
+}
+
+void RandomizeWorldStateBinary(LifeWorld_t *world, long seed)
+{
+  srand(seed);
+
+  long x = 0;
+  long y = 0;
+  for (y = 0; y < world->height; y++)
+  {
+    for (x = 0; x < world->width; x++)
+    {
+      SetCellState(x, y, world, 0); //set to zero first so no leftover state
+      SetCellState(x, y, world, (LifeWorldCell_t)(rand() % 2));
+    }
+  }
 }
 
 char NumLiveNeighbors(long x, long y, LifeWorld_t *world)

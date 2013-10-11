@@ -16,6 +16,7 @@ LifeWorldCell_t GetCellState(long x, long y, LifeWorld_t *world);
 void SetCellState(long x, long y, LifeWorld_t *world, LifeWorldCell_t);
 
 LifeWorldCell_t SetWorldState(LifeWorld_t *world, LifeWorldCell_t state);
+void RandomizeWorldStateBinary(LifeWorld_t *world, long seed);
 void LifeGeneration(LifeWorld_t *newWorld, LifeWorld_t *const oldWorld);
 void DrawWorld(SDL_Surface *screen, LifeWorld_t *world);
 void SyncWorldToScreen(SDL_Surface *screen, LifeWorld_t *world, int syncRateHz);
