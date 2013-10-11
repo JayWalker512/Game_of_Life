@@ -1,19 +1,20 @@
 typedef char LifeWorldCell_t;
+typedef long LifeWorldDim_t;
 
 typedef struct LifeWorld_s {
 	LifeWorldCell_t *world;
-	long width;
-	long height;
+	LifeWorldDim_t width;
+	LifeWorldDim_t height;
 } LifeWorld_t;
 
 SDL_Surface *CreateWindow(int width, int height, const char *title);
 char CheckInput(char *bRandomizeWorld);
-LifeWorld_t *NewLifeWorld(long width, long height);
+LifeWorld_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height);
 void DestroyLifeWorld(LifeWorld_t *world);
 void SwapWorldPointers(LifeWorld_t **front, LifeWorld_t **back);
 
-LifeWorldCell_t GetCellState(long x, long y, LifeWorld_t *world);
-void SetCellState(long x, long y, LifeWorld_t *world, LifeWorldCell_t);
+LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world);
+void SetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world, LifeWorldCell_t);
 
 LifeWorldCell_t SetWorldState(LifeWorld_t *world, LifeWorldCell_t state);
 void RandomizeWorldStateBinary(LifeWorld_t *world, long seed);

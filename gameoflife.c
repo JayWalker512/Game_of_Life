@@ -79,7 +79,7 @@ char CheckInput(char *bRandomizeWorld)
   return 1;
 }
 
-LifeWorld_t *NewLifeWorld(long width, long height)
+LifeWorld_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height)
 {
   LifeWorld_t *world = malloc(sizeof(LifeWorld_t));
   world->world = malloc(sizeof(unsigned char) * (width * height));
@@ -107,14 +107,14 @@ void SwapWorldPointers(LifeWorld_t **front, LifeWorld_t **back)
   *back = temp;
 }
 
-LifeWorldCell_t GetCellState(long x, long y, LifeWorld_t *world)
+LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world)
 {
-  long wrappedX = abs(x) % world->width;
-  long wrappedY = abs(y) % world->height;
+  LifeWorldDim_t wrappedX = abs(x) % world->width;
+  LifeWorldDim_t wrappedY = abs(y) % world->height;
   return (world->world[(wrappedY * world->width) + wrappedX]);
 }
 
-void SetCellState(long x, long y, LifeWorld_t *world, LifeWorldCell_t state)
+void SetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world, LifeWorldCell_t state)
 {
   world->world[(y * world->width) + x] = state;
 }
@@ -123,8 +123,8 @@ void RandomizeWorldStateBinary(LifeWorld_t *world, long seed)
 {
   srand(seed);
 
-  long x = 0;
-  long y = 0;
+  LifeWorldDim_t x = 0;
+  LifeWorldDim_t y = 0;
   for (y = 0; y < world->height; y++)
   {
     for (x = 0; x < world->width; x++)
@@ -135,7 +135,7 @@ void RandomizeWorldStateBinary(LifeWorld_t *world, long seed)
   }
 }
 
-char NumLiveNeighbors(long x, long y, LifeWorld_t *world)
+char NumLiveNeighbors(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world)
 {
   char numLive = 0;
 
@@ -176,8 +176,8 @@ char NumLiveNeighbors(long x, long y, LifeWorld_t *world)
 
 LifeWorldCell_t SetWorldState(LifeWorld_t *world, LifeWorldCell_t state)
 {
-  long x = 0;
-  long y = 0;
+  LifeWorldDim_t x = 0;
+  LifeWorldDim_t y = 0;
   for (y = 0; y < world->height; y++)
   {
     for (x = 0; x < world->width; x++)
@@ -193,8 +193,8 @@ void LifeGeneration(LifeWorld_t *newWorld, LifeWorld_t *const oldWorld)
 {
   SetWorldState(newWorld, 0); //initialize newWorld before we simulate
 
-  long x = 0;
-  long y = 0;
+  LifeWorldDim_t x = 0;
+  LifeWorldDim_t y = 0;
   for (y = 0; y < oldWorld->height; y++)
   {
     for (x = 0; x < oldWorld->width; x++)
@@ -244,8 +244,8 @@ void DrawWorld(SDL_Surface *screen, LifeWorld_t *world)
   SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
   int cellWidth = screen->w / world->width;
   int cellHeight = screen->h / world->height;
-  long x = 0;
-  long y = 0;
+  LifeWorldDim_t x = 0;
+  LifeWorldDim_t y = 0;
   for (y = 0; y < world->height; y++)
   {
     for (x = 0; x < world->width; x++)
