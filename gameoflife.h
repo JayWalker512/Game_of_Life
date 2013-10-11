@@ -7,7 +7,7 @@ typedef struct LifeWorld_s {
 } LifeWorld_t;
 
 SDL_Surface *CreateWindow(int width, int height, const char *title);
-char CheckInput(void);
+char CheckInput(char *bRandomizeWorld);
 LifeWorld_t *NewLifeWorld(long width, long height);
 void DestroyLifeWorld(LifeWorld_t *world);
 void SwapWorldPointers(LifeWorld_t **front, LifeWorld_t **back);

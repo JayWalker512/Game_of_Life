@@ -33,9 +33,11 @@ int main(int argc, char **argv)
       SwapWorldPointers(&pWorldFrontBuffer, &pWorldBackBuffer);
 
       generations = DoGensPerSec(generations);
-      gameRunning = CheckInput();
 
-      SDL_Delay(100);
+      char bRandomizeWorld = 0;
+      gameRunning = CheckInput(&bRandomizeWorld);
+      if (bRandomizeWorld)
+        RandomizeWorldStateBinary(pWorldFrontBuffer, SDL_GetTicks());
     }
 
     DestroyLifeWorld(pWorldFrontBuffer);
@@ -54,7 +56,7 @@ SDL_Surface *CreateWindow(int width, int height, const char *title)
   return screen;
 }
 
-char CheckInput(void)
+char CheckInput(char *bRandomizeWorld)
 {
   SDL_Event event;
   if (SDL_PollEvent(&event))
@@ -68,6 +70,9 @@ char CheckInput(void)
     {
       if (event.key.keysym.sym == SDLK_ESCAPE)
         return 0;
+
+      if (event.key.keysym.sym == SDLK_SPACE)
+        *bRandomizeWorld = 1;
     }
   }
 
