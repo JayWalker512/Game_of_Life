@@ -10,10 +10,10 @@
 
 int main(int argc, char **argv)
 {
-    SDL_Surface *screen = CreateWindow(640, 480, "Game of Life");
+    SDL_Surface *screen = CreateWindow(800, 600, "Game of Life");
 
-    LifeWorld_t *pWorldBackBuffer = NewLifeWorld(32, 32);
-    LifeWorld_t *pWorldFrontBuffer = NewLifeWorld(32, 32);
+    LifeWorld_t *pWorldBackBuffer = NewLifeWorld(80, 60);
+    LifeWorld_t *pWorldFrontBuffer = NewLifeWorld(80, 60);
 
     RandomizeWorldStateBinary(pWorldFrontBuffer, SDL_GetTicks());
 
