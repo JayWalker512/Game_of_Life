@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     while (gameRunning)
     {
       //Draw world so we can see initial state
-      SyncWorldToScreen(screen, pWorldFrontBuffer, 0);
+      SyncWorldToScreen(screen, pWorldFrontBuffer, 60);
       
       //Simulate a generation from pWorldFrontBuffer
       //and store it in pWorldbackBuffer
