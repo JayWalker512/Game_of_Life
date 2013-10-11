@@ -1,7 +1,7 @@
 //Game of Life
 //Brandon Foltz
 //use this line to compile me:
-//gcc gameoflife.c -o gameoflife -lSDL -lSDL_gfx -I/usr/include/SDL
+//gcc gameoflife.c -o gameoflife -lSDL -lSDL_gfx -I/usr/include/SDL -Wall
 #include <stdlib.h>
 #include <math.h>
 #include "SDL.h"
@@ -112,14 +112,14 @@ void SwapWorldPointers(LifeWorld_t **front, LifeWorld_t **back)
   *back = temp;
 }
 
-char GetCellState(long x, long y, LifeWorld_t *world)
+LifeWorldCell_t GetCellState(long x, long y, LifeWorld_t *world)
 {
   long wrappedX = abs(x) % world->width;
   long wrappedY = abs(y) % world->height;
   return (world->world[(wrappedY * world->width) + wrappedX]);
 }
 
-void SetCellState(long x, long y, LifeWorld_t *world, char state)
+void SetCellState(long x, long y, LifeWorld_t *world, LifeWorldCell_t state)
 {
   world->world[(y * world->width) + x] = state;
 }
@@ -163,7 +163,7 @@ char NumLiveNeighbors(long x, long y, LifeWorld_t *world)
   return numLive;
 }
 
-char SetWorldState(LifeWorld_t *world, char state)
+LifeWorldCell_t SetWorldState(LifeWorld_t *world, LifeWorldCell_t state)
 {
   long x = 0;
   long y = 0;

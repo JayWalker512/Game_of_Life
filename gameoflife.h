@@ -1,5 +1,7 @@
+typedef char LifeWorldCell_t;
+
 typedef struct LifeWorld_s {
-	char *world;
+	LifeWorldCell_t *world;
 	long width;
 	long height;
 } LifeWorld_t;
@@ -10,10 +12,10 @@ LifeWorld_t *NewLifeWorld(long width, long height);
 void DestroyLifeWorld(LifeWorld_t *world);
 void SwapWorldPointers(LifeWorld_t **front, LifeWorld_t **back);
 
-char GetCellState(long x, long y, LifeWorld_t *world);
-void SetCellState(long x, long y, LifeWorld_t *world, char state);
+LifeWorldCell_t GetCellState(long x, long y, LifeWorld_t *world);
+void SetCellState(long x, long y, LifeWorld_t *world, LifeWorldCell_t);
 
-char SetWorldState(LifeWorld_t *world, char state);
+LifeWorldCell_t SetWorldState(LifeWorld_t *world, LifeWorldCell_t state);
 void LifeGeneration(LifeWorld_t *newWorld, LifeWorld_t *const oldWorld);
 void DrawWorld(SDL_Surface *screen, LifeWorld_t *world);
 void SyncWorldToScreen(SDL_Surface *screen, LifeWorld_t *world, int syncRateHz);
