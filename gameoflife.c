@@ -27,9 +27,8 @@ int main(int argc, char **argv)
       return 1;
     }
 
-    //still single threaded, but this action requires locking!
+    //still single threaded, but this action requires locking with threads!
     RandomizeWorldStateBinary(worldContext.front, SDL_GetTicks());
-    LifeWorld_t *pWorldRenderBuffer = NewLifeWorld(80, 60);
 
     pthread_t lifeThread;
     int err = pthread_create(&lifeThread, NULL, &ThreadLifeMain, &worldContext);
@@ -39,16 +38,18 @@ int main(int argc, char **argv)
       return 1;
     }
 
-    //unsigned long generations = 0;
+    unsigned long generations = 0;
     while (worldContext.bRunning)
     {
       //Draw world so we can see initial state. 
       //This should happen inside SyncWorldToScreen only when we need
       //to sync, so we aren't constantly locking the context.
+      LifeWorld_t *pWorldRenderBuffer = NewLifeWorld(80, 60);
       pthread_mutex_lock(&worldContext.lock);
       CopyWorld(pWorldRenderBuffer, worldContext.front);
       pthread_mutex_unlock(&worldContext.lock);
       SyncWorldToScreen(screen, pWorldRenderBuffer, 60);
+      DestroyLifeWorld(pWorldRenderBuffer);
       
       //Simulate a generation from pWorldFrontBuffer
       //and store it in pWorldbackBuffer
@@ -58,7 +59,7 @@ int main(int argc, char **argv)
       //which we draw next loop
       SwapWorldPointers(&worldContext.front, &worldContext.back);
 
-      //generations = DoGensPerSec(generations);
+      generations = DoGensPerSec(generations);
 
       char bRandomizeWorld = 0;
       worldContext.bRunning = CheckInput(&bRandomizeWorld);
