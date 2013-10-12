@@ -30,6 +30,7 @@ int main(int argc, char **argv)
     //still single threaded, but this action requires locking with threads!
     RandomizeWorldStateBinary(worldContext.front, SDL_GetTicks());
 
+    //here we spawn the thread that will run the simulation
     pthread_t lifeThread;
     int err = pthread_create(&lifeThread, NULL, &ThreadLifeMain, &worldContext);
     if (err != 0)
@@ -38,16 +39,11 @@ int main(int argc, char **argv)
       return 1;
     }
 
-    unsigned long generations = 0;
+    //we start this loop in main thread that only does rendering and input
     while (worldContext.bRunning)
     {
       //Draw world so we can see initial state. 
       SyncWorldToScreen(screen, &worldContext, 60);
-      
-      //this block of code will go in the spawned thread!
-      LifeGeneration(worldContext.back, worldContext.front);
-      SwapThreadWorldContextPointers(&worldContext);
-      generations = DoGensPerSec(generations);
 
       char bRandomizeWorld = 0;
       worldContext.bRunning = CheckInput(&bRandomizeWorld);

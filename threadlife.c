@@ -13,7 +13,13 @@ void *ThreadLifeMain(void *worldContext)
 		context->front->width,
 		context->front->height);
 
-	while (context->bRunning);
+	unsigned long generations = 0;
+	while (context->bRunning)
+	{
+      LifeGeneration(context->back, context->front);
+      SwapThreadWorldContextPointers(context);
+      generations = DoGensPerSec(generations);
+	}
 
 	return NULL;
 }
