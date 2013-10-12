@@ -44,10 +44,9 @@ int main(int argc, char **argv)
       //Draw world so we can see initial state. 
       SyncWorldToScreen(screen, &worldContext, 60);
       
+      //this block of code will go in the spawned thread!
       LifeGeneration(worldContext.back, worldContext.front);
-
-      SwapWorldPointers(&worldContext.front, &worldContext.back);
-
+      SwapThreadWorldContextPointers(&worldContext);
       generations = DoGensPerSec(generations);
 
       char bRandomizeWorld = 0;
@@ -125,6 +124,13 @@ void SwapWorldPointers(LifeWorld_t **front, LifeWorld_t **back)
   LifeWorld_t *temp = *front;
   *front = *back;
   *back = temp;
+}
+
+void SwapThreadWorldContextPointers(ThreadWorldContext_t *worldContext)
+{
+  pthread_mutex_lock(&worldContext->lock);
+  SwapWorldPointers(&worldContext->front, &worldContext->back);
+  pthread_mutex_unlock(&worldContext->lock);
 }
 
 void CopyWorld(LifeWorld_t *dest, LifeWorld_t * const source)
