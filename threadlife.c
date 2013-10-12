@@ -19,6 +19,14 @@ void *ThreadLifeMain(void *worldContext)
       LifeGeneration(context->back, context->front);
       SwapThreadWorldContextPointers(context);
       generations = DoGensPerSec(generations);
+
+      if (context->bRandomize)
+      {
+      	pthread_mutex_lock(&context->lock);
+      	context->bRandomize = 0;
+      	RandomizeWorldStateBinary(context);
+      	pthread_mutex_unlock(&context->lock);
+      }
 	}
 
 	return NULL;

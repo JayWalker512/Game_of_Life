@@ -28,7 +28,7 @@ int main(int argc, char **argv)
     }
 
     //still single threaded, but this action requires locking with threads!
-    RandomizeWorldStateBinary(worldContext.front, SDL_GetTicks());
+    RandomizeWorldStateBinary(&worldContext);
 
     //here we spawn the thread that will run the simulation
     pthread_t lifeThread;
@@ -47,9 +47,12 @@ int main(int argc, char **argv)
 
       char bRandomizeWorld = 0;
       worldContext.bRunning = CheckInput(&bRandomizeWorld);
-      //havent decided how to deal with this yet
-      //if (bRandomizeWorld)
-      //  RandomizeWorldStateBinary(worldContext.front, SDL_GetTicks());
+      if (bRandomizeWorld)
+      {
+        pthread_mutex_lock(&worldContext.lock);
+        worldContext.bRandomize = 1;
+        pthread_mutex_unlock(&worldContext.lock);
+      }
     }
 
     //cleaning up
@@ -158,18 +161,21 @@ void SetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world, LifeWo
   world->world[(y * world->width) + x] = state;
 }
 
-void RandomizeWorldStateBinary(LifeWorld_t *world, long seed)
+void RandomizeWorldStateBinary(ThreadWorldContext_t *worldContext)
 {
-  srand(seed);
+  /*XXX: Note that rand() and srand() are NOT thread safe! It shouldn't break anything,
+    but there is hidden state in use. Will affect random number generation in OTHER threads
+    when used! */
+  srand(SDL_GetTicks());
 
   LifeWorldDim_t x = 0;
   LifeWorldDim_t y = 0;
-  for (y = 0; y < world->height; y++)
+  for (y = 0; y < worldContext->front->height; y++)
   {
-    for (x = 0; x < world->width; x++)
+    for (x = 0; x < worldContext->front->width; x++)
     {
-      SetCellState(x, y, world, 0); //set to zero first so no leftover state
-      SetCellState(x, y, world, (LifeWorldCell_t)(rand() % 2));
+      SetCellState(x, y, worldContext->front, 0); //set to zero first so no leftover state
+      SetCellState(x, y, worldContext->front, (LifeWorldCell_t)(rand() % 2));
     }
   }
 }
