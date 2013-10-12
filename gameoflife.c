@@ -42,21 +42,10 @@ int main(int argc, char **argv)
     while (worldContext.bRunning)
     {
       //Draw world so we can see initial state. 
-      //This should happen inside SyncWorldToScreen only when we need
-      //to sync, so we aren't constantly locking the context.
-      LifeWorld_t *pWorldRenderBuffer = NewLifeWorld(80, 60);
-      pthread_mutex_lock(&worldContext.lock);
-      CopyWorld(pWorldRenderBuffer, worldContext.front);
-      pthread_mutex_unlock(&worldContext.lock);
-      SyncWorldToScreen(screen, pWorldRenderBuffer, 60);
-      DestroyLifeWorld(pWorldRenderBuffer);
+      SyncWorldToScreen(screen, &worldContext, 60);
       
-      //Simulate a generation from pWorldFrontBuffer
-      //and store it in pWorldbackBuffer
       LifeGeneration(worldContext.back, worldContext.front);
 
-      //Swap buffers so pWorldBackBuffer is now pWorldFrontBuffer
-      //which we draw next loop
       SwapWorldPointers(&worldContext.front, &worldContext.back);
 
       generations = DoGensPerSec(generations);
@@ -269,20 +258,38 @@ void LifeGeneration(LifeWorld_t *newWorld, LifeWorld_t *const oldWorld)
   }
 }
 
-void SyncWorldToScreen(SDL_Surface *screen, LifeWorld_t *world, int syncRateHz)
+void SyncWorldToScreen(SDL_Surface *screen, ThreadWorldContext_t *worldContext, int syncRateHz)
 {
+  //fair amount of duplicated code here, can be cleaned up?
   static unsigned long endTime = 0;
   if (syncRateHz <= 0)
   {
-    DrawWorld(screen, world);
+    LifeWorld_t *pWorldRenderBuffer = NewLifeWorld(worldContext->front->width, 
+      worldContext->front->height);
+    pthread_mutex_lock(&worldContext->lock);
+    CopyWorld(pWorldRenderBuffer, worldContext->front);
+    pthread_mutex_unlock(&worldContext->lock);
+
+    DrawWorld(screen, pWorldRenderBuffer);
     SDL_Flip(screen);
+
+    DestroyLifeWorld(pWorldRenderBuffer);
   }
   else if (SDL_GetTicks() > endTime)
   {
+    LifeWorld_t *pWorldRenderBuffer = NewLifeWorld(worldContext->front->width, 
+      worldContext->front->height);
+    pthread_mutex_lock(&worldContext->lock);
+    CopyWorld(pWorldRenderBuffer, worldContext->front);
+    pthread_mutex_unlock(&worldContext->lock);
+
+    DrawWorld(screen, pWorldRenderBuffer);
+    SDL_Flip(screen);
+
+    DestroyLifeWorld(pWorldRenderBuffer);
+
     unsigned long delayMs = 1000 / syncRateHz;
     endTime = SDL_GetTicks() + delayMs;
-    DrawWorld(screen, world);
-    SDL_Flip(screen);
   }
 }
 
