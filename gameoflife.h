@@ -1,3 +1,8 @@
+#ifndef GAME_OF_LIFE_H
+#define GAME_OF_LIFE_H
+
+#include <SDL.h>
+
 typedef char LifeWorldCell_t;
 typedef long LifeWorldDim_t;
 
@@ -6,6 +11,12 @@ typedef struct LifeWorld_s {
 	LifeWorldDim_t width;
 	LifeWorldDim_t height;
 } LifeWorld_t;
+
+typedef struct ThreadWorldContext_s {
+	LifeWorld_t *front;
+	LifeWorld_t *back;
+	pthread_mutex_t lock;
+} ThreadWorldContext_t;
 
 SDL_Surface *CreateWindow(int width, int height, const char *title);
 char CheckInput(char *bRandomizeWorld);
@@ -23,3 +34,8 @@ void LifeGeneration(LifeWorld_t *newWorld, LifeWorld_t *const oldWorld);
 void DrawWorld(SDL_Surface *screen, LifeWorld_t *world);
 void SyncWorldToScreen(SDL_Surface *screen, LifeWorld_t *world, int syncRateHz);
 unsigned long DoGensPerSec(unsigned long gens);
+
+//threadlyfe!
+void *ThreadLifeMain(void *worldContext);
+
+#endif

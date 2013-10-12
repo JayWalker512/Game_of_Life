@@ -2,9 +2,11 @@
 //Brandon Foltz
 //use this line to compile me:
 //gcc gameoflife.c -o gameoflife -lSDL -lSDL_gfx -I/usr/include/SDL -Wall
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+#include <pthread.h>
 #include "SDL.h"
 #include "SDL_gfxPrimitives.h"
 #include "gameoflife.h"
@@ -13,40 +15,63 @@ int main(int argc, char **argv)
 {
     SDL_Surface *screen = CreateWindow(800, 600, "Game of Life");
 
-    LifeWorld_t *pWorldBackBuffer = NewLifeWorld(80, 60);
-    LifeWorld_t *pWorldFrontBuffer = NewLifeWorld(80, 60);
+    //create the thread context, this is the threads argument
+    ThreadWorldContext_t worldContext;
+    worldContext.front = NewLifeWorld(80, 60);
+    worldContext.back = NewLifeWorld(80, 60);
+
+    if (pthread_mutex_init(&worldContext.lock, NULL) != 0)
+    {
+      printf("Couldn't init mutex!");
+      return 1;
+    }
+
+    //still single threaded, but this action requires locking!
+    RandomizeWorldStateBinary(worldContext.front, SDL_GetTicks());
     LifeWorld_t *pWorldRenderBuffer = NewLifeWorld(80, 60);
 
-    RandomizeWorldStateBinary(pWorldFrontBuffer, SDL_GetTicks());
+    pthread_t lifeThread;
+    int err = pthread_create(&lifeThread, NULL, &ThreadLifeMain, &worldContext);
+    if (err != 0)
+    {
+      printf("Couldn't create thread: %s\n", strerror(err));
+      return 1;
+    }
 
     char gameRunning = 1;
-    unsigned long generations = 0;
+    //unsigned long generations = 0;
     while (gameRunning)
     {
-      //Draw world so we can see initial state
-      CopyWorld(pWorldRenderBuffer, pWorldFrontBuffer);
+      //Draw world so we can see initial state. 
+      //This should happen inside SyncWorldToScreen only when we need
+      //to sync, so we aren't constantly locking the context.
+      pthread_mutex_lock(&worldContext.lock);
+      CopyWorld(pWorldRenderBuffer, worldContext.front);
+      pthread_mutex_unlock(&worldContext.lock);
       SyncWorldToScreen(screen, pWorldRenderBuffer, 60);
       
       //Simulate a generation from pWorldFrontBuffer
       //and store it in pWorldbackBuffer
-      LifeGeneration(pWorldBackBuffer, pWorldFrontBuffer);
+      LifeGeneration(worldContext.back, worldContext.front);
 
       //Swap buffers so pWorldBackBuffer is now pWorldFrontBuffer
       //which we draw next loop
-      SwapWorldPointers(&pWorldFrontBuffer, &pWorldBackBuffer);
+      SwapWorldPointers(&worldContext.front, &worldContext.back);
 
-
-
-      generations = DoGensPerSec(generations);
+      //generations = DoGensPerSec(generations);
 
       char bRandomizeWorld = 0;
       gameRunning = CheckInput(&bRandomizeWorld);
-      if (bRandomizeWorld)
-        RandomizeWorldStateBinary(pWorldFrontBuffer, SDL_GetTicks());
+      //havent decided how to deal with this yet
+      //if (bRandomizeWorld)
+      //  RandomizeWorldStateBinary(worldContext.front, SDL_GetTicks());
     }
 
-    DestroyLifeWorld(pWorldFrontBuffer);
-    DestroyLifeWorld(pWorldBackBuffer);
+    //cleaning up
+    pthread_join(lifeThread, NULL);
+    pthread_mutex_destroy(&worldContext.lock);
+    DestroyLifeWorld(worldContext.front);
+    DestroyLifeWorld(worldContext.back);
     SDL_Quit();
 
     return 0;
@@ -112,7 +137,7 @@ void SwapWorldPointers(LifeWorld_t **front, LifeWorld_t **back)
   *back = temp;
 }
 
-void CopyWorld(LifeWorld_t *dest, LifeWorld_t *source)
+void CopyWorld(LifeWorld_t *dest, LifeWorld_t * const source)
 {
   //when we implement threading, this will have to lock the source & dest
   assert(source->width == dest->width);
