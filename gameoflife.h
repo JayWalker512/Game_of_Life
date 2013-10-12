@@ -16,6 +16,7 @@ typedef struct ThreadWorldContext_s {
 	LifeWorld_t *front;
 	LifeWorld_t *back;
 	pthread_mutex_t lock;
+	char bRunning;
 } ThreadWorldContext_t;
 
 SDL_Surface *CreateWindow(int width, int height, const char *title);

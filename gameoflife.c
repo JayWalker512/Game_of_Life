@@ -19,6 +19,7 @@ int main(int argc, char **argv)
     ThreadWorldContext_t worldContext;
     worldContext.front = NewLifeWorld(80, 60);
     worldContext.back = NewLifeWorld(80, 60);
+    worldContext.bRunning = 1;
 
     if (pthread_mutex_init(&worldContext.lock, NULL) != 0)
     {
@@ -38,9 +39,8 @@ int main(int argc, char **argv)
       return 1;
     }
 
-    char gameRunning = 1;
     //unsigned long generations = 0;
-    while (gameRunning)
+    while (worldContext.bRunning)
     {
       //Draw world so we can see initial state. 
       //This should happen inside SyncWorldToScreen only when we need
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
       //generations = DoGensPerSec(generations);
 
       char bRandomizeWorld = 0;
-      gameRunning = CheckInput(&bRandomizeWorld);
+      worldContext.bRunning = CheckInput(&bRandomizeWorld);
       //havent decided how to deal with this yet
       //if (bRandomizeWorld)
       //  RandomizeWorldStateBinary(worldContext.front, SDL_GetTicks());

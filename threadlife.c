@@ -12,5 +12,8 @@ void *ThreadLifeMain(void *worldContext)
 	printf("World dims are (%ld, %ld)\n", 
 		context->front->width,
 		context->front->height);
+
+	while (context->bRunning);
+
 	return NULL;
 }
