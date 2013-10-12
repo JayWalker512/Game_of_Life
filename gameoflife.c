@@ -4,6 +4,7 @@
 //gcc gameoflife.c -o gameoflife -lSDL -lSDL_gfx -I/usr/include/SDL -Wall
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
 #include "SDL.h"
 #include "SDL_gfxPrimitives.h"
 #include "gameoflife.h"
@@ -14,6 +15,7 @@ int main(int argc, char **argv)
 
     LifeWorld_t *pWorldBackBuffer = NewLifeWorld(80, 60);
     LifeWorld_t *pWorldFrontBuffer = NewLifeWorld(80, 60);
+    LifeWorld_t *pWorldRenderBuffer = NewLifeWorld(80, 60);
 
     RandomizeWorldStateBinary(pWorldFrontBuffer, SDL_GetTicks());
 
@@ -22,7 +24,8 @@ int main(int argc, char **argv)
     while (gameRunning)
     {
       //Draw world so we can see initial state
-      SyncWorldToScreen(screen, pWorldFrontBuffer, 60);
+      CopyWorld(pWorldRenderBuffer, pWorldFrontBuffer);
+      SyncWorldToScreen(screen, pWorldRenderBuffer, 60);
       
       //Simulate a generation from pWorldFrontBuffer
       //and store it in pWorldbackBuffer
@@ -31,6 +34,8 @@ int main(int argc, char **argv)
       //Swap buffers so pWorldBackBuffer is now pWorldFrontBuffer
       //which we draw next loop
       SwapWorldPointers(&pWorldFrontBuffer, &pWorldBackBuffer);
+
+
 
       generations = DoGensPerSec(generations);
 
@@ -105,6 +110,23 @@ void SwapWorldPointers(LifeWorld_t **front, LifeWorld_t **back)
   LifeWorld_t *temp = *front;
   *front = *back;
   *back = temp;
+}
+
+void CopyWorld(LifeWorld_t *dest, LifeWorld_t *source)
+{
+  //when we implement threading, this will have to lock the source & dest
+  assert(source->width == dest->width);
+  assert(source->height == dest->height);
+
+  LifeWorldDim_t x = 0;
+  LifeWorldDim_t y = 0;
+  for (y = 0; y < source->height; y++)
+  {
+    for (x = 0; x < source->width; x++)
+    {
+      SetCellState(x, y, dest, GetCellState(x, y, source));
+    }
+  }
 }
 
 LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world)

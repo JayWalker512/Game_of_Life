@@ -12,6 +12,7 @@ char CheckInput(char *bRandomizeWorld);
 LifeWorld_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height);
 void DestroyLifeWorld(LifeWorld_t *world);
 void SwapWorldPointers(LifeWorld_t **front, LifeWorld_t **back);
+void CopyWorld(LifeWorld_t *dest, LifeWorld_t * const source);
 
 LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world);
 void SetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world, LifeWorldCell_t);
