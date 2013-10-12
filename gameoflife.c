@@ -16,9 +16,11 @@ int main(int argc, char **argv)
     SDL_Surface *screen = CreateWindow(800, 600, "Game of Life");
 
     //create the thread context, this is the threads argument
+    const LifeWorldDim_t worldWidth = 80;
+    const LifeWorldDim_t worldHeight = 60;
     ThreadWorldContext_t worldContext;
-    worldContext.front = NewLifeWorld(80, 60);
-    worldContext.back = NewLifeWorld(80, 60);
+    worldContext.front = NewLifeWorld(worldWidth, worldHeight);
+    worldContext.back = NewLifeWorld(worldWidth, worldHeight);
     worldContext.bRunning = 1;
 
     if (pthread_mutex_init(&worldContext.lock, NULL) != 0)
