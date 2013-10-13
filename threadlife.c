@@ -27,6 +27,7 @@ void *ThreadLifeMain(void *worldContext)
       	RandomizeWorldStateBinary(context);
       	pthread_mutex_unlock(&context->lock);
       }
+	
 	}
 
 	return NULL;

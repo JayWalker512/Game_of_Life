@@ -153,8 +153,20 @@ void CopyWorld(LifeWorld_t *dest, LifeWorld_t * const source)
 
 LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world)
 {
-  LifeWorldDim_t wrappedX = abs(x) % world->width;
-  LifeWorldDim_t wrappedY = abs(y) % world->height;
+  LifeWorldDim_t wrappedX = x; 
+  LifeWorldDim_t wrappedY = y; 
+	while (wrappedX >= world->width)
+		wrappedX -= world->width;
+
+	while (wrappedX < 0)
+		wrappedX += world->width;
+
+	while (wrappedY >= world->height)
+		wrappedY -= world->height;
+
+	while (wrappedY < 0)
+		wrappedY += world->height;
+
   return (world->world[(wrappedY * world->width) + wrappedX]);
 }
 
