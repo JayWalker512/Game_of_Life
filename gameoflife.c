@@ -1,7 +1,7 @@
 //Game of Life
 //Brandon Foltz
 //use this line to compile me:
-//gcc gameoflife.c -o gameoflife -lSDL -lSDL_gfx -I/usr/include/SDL -Wall
+//gcc gameoflife.c threadlife.c -o gameoflife -pthread -lSDL -lSDL_gfx -lm -I/usr/include/SDL -Wall
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -13,58 +13,58 @@
 
 int main(int argc, char **argv)
 {
-    SDL_Surface *screen = CreateWindow(800, 600, "Game of Life");
+  SDL_Surface *screen = CreateWindow(800, 600, "Game of Life");
 
-    //create the thread context, this is the threads argument
-    const LifeWorldDim_t worldWidth = 80;
-    const LifeWorldDim_t worldHeight = 60;
-    ThreadWorldContext_t worldContext;
-    worldContext.front = NewLifeWorld(worldWidth, worldHeight);
-    worldContext.back = NewLifeWorld(worldWidth, worldHeight);
-    worldContext.bRunning = 1;
+  //create the thread context, this is the threads argument
+  const LifeWorldDim_t worldWidth = 80;
+  const LifeWorldDim_t worldHeight = 60;
+  ThreadWorldContext_t worldContext;
+  worldContext.front = NewLifeWorld(worldWidth, worldHeight);
+  worldContext.back = NewLifeWorld(worldWidth, worldHeight);
+  worldContext.bRunning = 1;
 
-    if (pthread_mutex_init(&worldContext.lock, NULL) != 0)
+  if (pthread_mutex_init(&worldContext.lock, NULL) != 0)
+  {
+    printf("Couldn't init mutex!");
+    return 1;
+  }
+
+  //still single threaded, but this action requires locking with threads!
+  RandomizeWorldStateBinary(&worldContext);
+
+  //here we spawn the thread that will run the simulation
+  pthread_t lifeThread;
+  int err = pthread_create(&lifeThread, NULL, &ThreadLifeMain, &worldContext);
+  if (err != 0)
+  {
+    printf("Couldn't create thread: %s\n", strerror(err));
+    return 1;
+  }
+
+  //we start this loop in main thread that only does rendering and input
+  while (worldContext.bRunning)
+  {
+    //Draw world so we can see initial state. 
+    SyncWorldToScreen(screen, &worldContext, 60);
+
+    char bRandomizeWorld = 0;
+    worldContext.bRunning = CheckInput(&bRandomizeWorld);
+    if (bRandomizeWorld)
     {
-      printf("Couldn't init mutex!");
-      return 1;
+      pthread_mutex_lock(&worldContext.lock);
+      worldContext.bRandomize = 1;
+      pthread_mutex_unlock(&worldContext.lock);
     }
+  }
 
-    //still single threaded, but this action requires locking with threads!
-    RandomizeWorldStateBinary(&worldContext);
+  //cleaning up
+  pthread_join(lifeThread, NULL);
+  pthread_mutex_destroy(&worldContext.lock);
+  DestroyLifeWorld(worldContext.front);
+  DestroyLifeWorld(worldContext.back);
+  SDL_Quit();
 
-    //here we spawn the thread that will run the simulation
-    pthread_t lifeThread;
-    int err = pthread_create(&lifeThread, NULL, &ThreadLifeMain, &worldContext);
-    if (err != 0)
-    {
-      printf("Couldn't create thread: %s\n", strerror(err));
-      return 1;
-    }
-
-    //we start this loop in main thread that only does rendering and input
-    while (worldContext.bRunning)
-    {
-      //Draw world so we can see initial state. 
-      SyncWorldToScreen(screen, &worldContext, 60);
-
-      char bRandomizeWorld = 0;
-      worldContext.bRunning = CheckInput(&bRandomizeWorld);
-      if (bRandomizeWorld)
-      {
-        pthread_mutex_lock(&worldContext.lock);
-        worldContext.bRandomize = 1;
-        pthread_mutex_unlock(&worldContext.lock);
-      }
-    }
-
-    //cleaning up
-    pthread_join(lifeThread, NULL);
-    pthread_mutex_destroy(&worldContext.lock);
-    DestroyLifeWorld(worldContext.front);
-    DestroyLifeWorld(worldContext.back);
-    SDL_Quit();
-
-    return 0;
+  return 0;
 }
 
 SDL_Surface *CreateWindow(int width, int height, const char *title)
