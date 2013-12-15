@@ -13,11 +13,11 @@
 
 int main(int argc, char **argv)
 {
-  SDL_Surface *screen = CreateWindow(800, 600, "Game of Life");
+  SDL_Surface *screen = CreateWindow(960, 640, "Game of Life", 0);
 
   //create the thread context, this is the threads argument
-  const LifeWorldDim_t worldWidth = 80;
-  const LifeWorldDim_t worldHeight = 60;
+  const LifeWorldDim_t worldWidth = 240;
+  const LifeWorldDim_t worldHeight = 160;
   ThreadWorldContext_t worldContext;
   worldContext.front = NewLifeWorld(worldWidth, worldHeight);
   worldContext.back = NewLifeWorld(worldWidth, worldHeight);
@@ -67,12 +67,22 @@ int main(int argc, char **argv)
   return 0;
 }
 
-SDL_Surface *CreateWindow(int width, int height, const char *title)
+SDL_Surface *CreateWindow(int width, int height, const char *title, char bFull)
 {
   SDL_Init(SDL_INIT_VIDEO);
-  SDL_Surface *screen = SDL_SetVideoMode(width, height, 0, 
-    SDL_HWSURFACE | SDL_DOUBLEBUF );
-  SDL_WM_SetCaption(title, 0 );
+  SDL_Surface *screen;
+  if (bFull)
+  {
+	  screen = SDL_SetVideoMode(width, height, 0, 
+	    SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_FULLSCREEN );
+	}
+	else 
+	{
+		screen = SDL_SetVideoMode(width, height, 0, 
+	    SDL_HWSURFACE | SDL_DOUBLEBUF );
+	}
+
+	SDL_WM_SetCaption(title, 0 );
   return screen;
 }
 

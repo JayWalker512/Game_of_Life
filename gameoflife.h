@@ -20,7 +20,7 @@ typedef struct ThreadWorldContext_s {
 	char bRandomize;
 } ThreadWorldContext_t;
 
-SDL_Surface *CreateWindow(int width, int height, const char *title);
+SDL_Surface *CreateWindow(int width, int height, const char *title, char bFull);
 char CheckInput(char *bRandomizeWorld);
 LifeWorld_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height);
 void DestroyLifeWorld(LifeWorld_t *world);
