@@ -19,8 +19,8 @@ int main(int argc, char **argv)
   SDL_GLContext glContext = InitSDL_GL(window);
 
   //create the thread context, this is the threads argument
-  const LifeWorldDim_t worldWidth = 240;
-  const LifeWorldDim_t worldHeight = 160;
+  const LifeWorldDim_t worldWidth = 400;
+  const LifeWorldDim_t worldHeight = 300;
   ThreadWorldContext_t worldContext;
   worldContext.front = NewLifeWorld(worldWidth, worldHeight);
   worldContext.back = NewLifeWorld(worldWidth, worldHeight);
@@ -340,8 +340,12 @@ void DrawWorld(SDL_Window *window, LifeGraphicsContext_t *graphicsContext)
             x * cellWidth, y * cellHeight, 
             (x * cellWidth) + cellWidth, (y * cellHeight) + cellHeight,
             255, 0, 0, 255);*/
+
+        //Think the graphic artifact where cells touch or don't is a result
+        //Of FP imprecision. Quads SHOULD touch, not be slighlty apart. Need
+        //a different division here.
         DrawRect(graphicsContext->pQuadDrawData, 
-          ((float)x / worldW) * (1 + cellWidth), ((float)y / worldH) * (1 + cellHeight), 0.1f,
+          ((float)x / worldW), ((float)y / worldH), 0.0f,
           cellWidth, cellHeight);
         /*printf("x: %f, y: %f, w: %f, h: %f\n", 
           ((float)x / worldW) * (1 + cellWidth), ((float)y / worldH) * (1 + cellHeight),
@@ -353,9 +357,9 @@ void DrawWorld(SDL_Window *window, LifeGraphicsContext_t *graphicsContext)
             x * cellWidth, y * cellHeight, 
             (x * cellWidth) + cellWidth, (y * cellHeight) + cellHeight,
             0, 0, 0, 255);*/
-        DrawRect(graphicsContext->pQuadDrawData, 
-          (x / worldW) * (1 + cellWidth), (y / worldH) * (1 + cellHeight), 0.9f,
-          cellWidth, cellHeight);
+        /*DrawRect(graphicsContext->pQuadDrawData, 
+          ((float)x / worldW), ((float)y / worldH), 0.9f,
+          cellWidth, cellHeight);*/
       }
     }
   }
