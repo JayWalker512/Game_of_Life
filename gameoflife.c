@@ -10,6 +10,7 @@
 #include "SDL.h"
 #include "SDL_gfxPrimitives.h"
 #include "gameoflife.h"
+#include "threadlife.h"
 
 int main(int argc, char **argv)
 {
