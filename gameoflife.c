@@ -1,20 +1,22 @@
 //Game of Life
 //Brandon Foltz
 //use this line to compile me:
-//gcc gameoflife.c threadlife.c -o gameoflife -pthread -lSDL -lSDL_gfx -lm -I/usr/include/SDL -Wall
+//gcc gameoflife.c threadlife.c graphics.c -o gameoflife -pthread -Wall -std=c99 -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm -Wall -g
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
 #include <pthread.h>
-#include "SDL.h"
-#include "SDL_gfxPrimitives.h"
 #include "gameoflife.h"
 #include "threadlife.h"
+#include "graphics.h"
+#include <SDL2/SDL.h>
 
 int main(int argc, char **argv)
 {
-  SDL_Surface *screen = CreateWindow(960, 640, "Game of Life", 0);
+  //SDL_Surface *screen = CreateWindow(960, 640, "Game of Life", 0);
+  SDL_Window *window = InitSDL(1366, 768, "Game of Life", 0);
+  SDL_GLContext glContext = InitSDL_GL(window);
 
   //create the thread context, this is the threads argument
   const LifeWorldDim_t worldWidth = 240;
@@ -22,7 +24,15 @@ int main(int argc, char **argv)
   ThreadWorldContext_t worldContext;
   worldContext.front = NewLifeWorld(worldWidth, worldHeight);
   worldContext.back = NewLifeWorld(worldWidth, worldHeight);
-  worldContext.bRunning = 1;
+
+  //create graphics context
+  LifeGraphicsContext_t graphicsContext;
+  graphicsContext.pWorldRenderBuffer = NewLifeWorld(worldWidth, worldHeight);
+  graphicsContext.pQuadDrawData = NewQuadDataBuffer(worldWidth * worldHeight);
+  if (!SetQuadShader(graphicsContext.pQuadDrawData, BuildShaderProgram("vs1.glsl", "fs1.glsl")))
+  {
+    printf("Couldn't set shader!\n");
+  }
 
   if (pthread_mutex_init(&worldContext.lock, NULL) != 0)
   {
@@ -32,6 +42,8 @@ int main(int argc, char **argv)
 
   //still single threaded, but this action requires locking with threads!
   RandomizeWorldStateBinary(&worldContext);
+  worldContext.bRandomize = 0; //needs to be initialied to use in thread 2!
+  worldContext.bRunning = 1;
 
   //here we spawn the thread that will run the simulation
   pthread_t lifeThread;
@@ -42,11 +54,11 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  //we start this loop in main thread that only does rendering and input
+  //we start this loop in main thread that only does rendering and inpu
   while (worldContext.bRunning)
   {
     //Draw world so we can see initial state. 
-    SyncWorldToScreen(screen, &worldContext, 60);
+    SyncWorldToScreen(window, &worldContext, &graphicsContext, 60);
 
     char bRandomizeWorld = 0;
     worldContext.bRunning = CheckInput(&bRandomizeWorld);
@@ -63,28 +75,12 @@ int main(int argc, char **argv)
   pthread_mutex_destroy(&worldContext.lock);
   DestroyLifeWorld(worldContext.front);
   DestroyLifeWorld(worldContext.back);
+  DestroyLifeWorld(graphicsContext.pWorldRenderBuffer);
+  DestroyQuadDrawData(graphicsContext.pQuadDrawData);
+  SDL_GL_DeleteContext(glContext);
   SDL_Quit();
 
   return 0;
-}
-
-SDL_Surface *CreateWindow(int width, int height, const char *title, char bFull)
-{
-  SDL_Init(SDL_INIT_VIDEO);
-  SDL_Surface *screen;
-  if (bFull)
-  {
-	  screen = SDL_SetVideoMode(width, height, 0, 
-	    SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_FULLSCREEN );
-	}
-	else 
-	{
-		screen = SDL_SetVideoMode(width, height, 0, 
-	    SDL_HWSURFACE | SDL_DOUBLEBUF );
-	}
-
-	SDL_WM_SetCaption(title, 0 );
-  return screen;
 }
 
 char CheckInput(char *bRandomizeWorld)
@@ -291,69 +287,83 @@ void LifeGeneration(LifeWorld_t *newWorld, LifeWorld_t *const oldWorld)
   }
 }
 
-void SyncWorldToScreen(SDL_Surface *screen, ThreadWorldContext_t *worldContext, int syncRateHz)
+void SyncWorldToScreen(SDL_Window *window, ThreadWorldContext_t *worldContext, LifeGraphicsContext_t *graphicsContext, int syncRateHz)
 {
   //fair amount of duplicated code here, can be cleaned up?
   static unsigned long endTime = 0;
   if (syncRateHz <= 0)
   {
-    LifeWorld_t *pWorldRenderBuffer = NewLifeWorld(worldContext->front->width, 
-      worldContext->front->height);
     pthread_mutex_lock(&worldContext->lock);
-    CopyWorld(pWorldRenderBuffer, worldContext->front);
+    CopyWorld(graphicsContext->pWorldRenderBuffer, worldContext->front);
     pthread_mutex_unlock(&worldContext->lock);
 
-    DrawWorld(screen, pWorldRenderBuffer);
-    SDL_Flip(screen);
-
-    DestroyLifeWorld(pWorldRenderBuffer);
+    DrawWorld(window, graphicsContext);
   }
   else if (SDL_GetTicks() > endTime)
   {
-    LifeWorld_t *pWorldRenderBuffer = NewLifeWorld(worldContext->front->width, 
-      worldContext->front->height);
+
     pthread_mutex_lock(&worldContext->lock);
-    CopyWorld(pWorldRenderBuffer, worldContext->front);
+    CopyWorld(graphicsContext->pWorldRenderBuffer, worldContext->front);
     pthread_mutex_unlock(&worldContext->lock);
 
-    DrawWorld(screen, pWorldRenderBuffer);
-    SDL_Flip(screen);
-
-    DestroyLifeWorld(pWorldRenderBuffer);
+    DrawWorld(window, graphicsContext);
 
     unsigned long delayMs = 1000 / syncRateHz;
     endTime = SDL_GetTicks() + delayMs;
   }
 }
 
-void DrawWorld(SDL_Surface *screen, LifeWorld_t *world)
+void DrawWorld(SDL_Window *window, LifeGraphicsContext_t *graphicsContext)
 {
   //clear screen first
-  SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
-  int cellWidth = screen->w / world->width;
-  int cellHeight = screen->h / world->height;
+  //SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+  glClearColor(0.1, 0.0, 0.0, 0.0);
+  glClearDepth(1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  int worldW, worldH;
+  worldW = graphicsContext->pWorldRenderBuffer->width;
+  worldH =  graphicsContext->pWorldRenderBuffer->height;
+  int screenW, screenH;
+  SDL_GetWindowSize(window, &screenW, &screenH);
+  float cellWidth = 1.0f / screenW * (screenW / worldW);
+  float cellHeight = 1.0f / screenH * (screenH / worldH);
   LifeWorldDim_t x = 0;
   LifeWorldDim_t y = 0;
-  for (y = 0; y < world->height; y++)
+  for (y = 0; y < worldH; y++)
   {
-    for (x = 0; x < world->width; x++)
+    for (x = 0; x < worldW; x++)
     {
-      if (GetCellState(x, y, world))
+      if (GetCellState(x, y, graphicsContext->pWorldRenderBuffer))
       {
-        boxRGBA(screen, 
-              x * cellWidth, y * cellHeight, 
-              (x * cellWidth) + cellWidth, (y * cellHeight) + cellHeight,
-              255, 0, 0, 255);
+        /*boxRGBA(screen, 
+            x * cellWidth, y * cellHeight, 
+            (x * cellWidth) + cellWidth, (y * cellHeight) + cellHeight,
+            255, 0, 0, 255);*/
+        DrawRect(graphicsContext->pQuadDrawData, 
+          ((float)x / worldW) * (1 + cellWidth), ((float)y / worldH) * (1 + cellHeight), 0.1f,
+          cellWidth, cellHeight);
+        /*printf("x: %f, y: %f, w: %f, h: %f\n", 
+          ((float)x / worldW) * (1 + cellWidth), ((float)y / worldH) * (1 + cellHeight),
+          cellWidth, cellHeight);*/
       }
       else
       {
-        boxRGBA(screen, 
-              x * cellWidth, y * cellHeight, 
-              (x * cellWidth) + cellWidth, (y * cellHeight) + cellHeight,
-              0, 0, 0, 255);
+        /*boxRGBA(screen, 
+            x * cellWidth, y * cellHeight, 
+            (x * cellWidth) + cellWidth, (y * cellHeight) + cellHeight,
+            0, 0, 0, 255);*/
+        DrawRect(graphicsContext->pQuadDrawData, 
+          (x / worldW) * (1 + cellWidth), (y / worldH) * (1 + cellHeight), 0.9f,
+          cellWidth, cellHeight);
       }
     }
   }
+
+  DrawQuadData(graphicsContext->pQuadDrawData, 
+    graphicsContext->pQuadDrawData->shader);
+  ClearQuadDrawData(graphicsContext->pQuadDrawData);
+  SDL_GL_SwapWindow(window);
 }
 
 unsigned long DoGensPerSec(unsigned long gens)
