@@ -15,12 +15,12 @@
 int main(int argc, char **argv)
 {
   //SDL_Surface *screen = CreateWindow(960, 640, "Game of Life", 0);
-  SDL_Window *window = InitSDL(3200, 1080, "Game of Life", 1);
+  SDL_Window *window = InitSDL(960, 600, "Game of Life", 0);
   SDL_GLContext glContext = InitSDL_GL(window);
 
   //create the thread context, this is the threads argument
-  const LifeWorldDim_t worldWidth = 1600;
-  const LifeWorldDim_t worldHeight = 540;
+  const LifeWorldDim_t worldWidth = 272;
+  const LifeWorldDim_t worldHeight = 152;
   ThreadWorldContext_t worldContext;
   worldContext.front = NewLifeWorld(worldWidth, worldHeight);
   worldContext.back = NewLifeWorld(worldWidth, worldHeight);
