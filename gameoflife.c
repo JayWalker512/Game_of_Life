@@ -15,12 +15,12 @@
 int main(int argc, char **argv)
 {
   //SDL_Surface *screen = CreateWindow(960, 640, "Game of Life", 0);
-  SDL_Window *window = InitSDL(1366, 768, "Game of Life", 0);
+  SDL_Window *window = InitSDL(3200, 1080, "Game of Life", 1);
   SDL_GLContext glContext = InitSDL_GL(window);
 
   //create the thread context, this is the threads argument
-  const LifeWorldDim_t worldWidth = 400;
-  const LifeWorldDim_t worldHeight = 300;
+  const LifeWorldDim_t worldWidth = 1600;
+  const LifeWorldDim_t worldHeight = 540;
   ThreadWorldContext_t worldContext;
   worldContext.front = NewLifeWorld(worldWidth, worldHeight);
   worldContext.back = NewLifeWorld(worldWidth, worldHeight);
@@ -326,8 +326,8 @@ void DrawWorld(SDL_Window *window, LifeGraphicsContext_t *graphicsContext)
   worldH =  graphicsContext->pWorldRenderBuffer->height;
   int screenW, screenH;
   SDL_GetWindowSize(window, &screenW, &screenH);
-  float cellWidth = 1.0f / screenW * (screenW / worldW);
-  float cellHeight = 1.0f / screenH * (screenH / worldH);
+  float cellWidth = 1.0f / (float)screenW * ((float)screenW / worldW);
+  float cellHeight = 1.0f / (float)screenH * ((float)screenH / worldH);
   LifeWorldDim_t x = 0;
   LifeWorldDim_t y = 0;
   for (y = 0; y < worldH; y++)
@@ -348,7 +348,7 @@ void DrawWorld(SDL_Window *window, LifeGraphicsContext_t *graphicsContext)
           ((float)x / worldW), ((float)y / worldH), 0.0f,
           cellWidth, cellHeight);
         /*printf("x: %f, y: %f, w: %f, h: %f\n", 
-          ((float)x / worldW) * (1 + cellWidth), ((float)y / worldH) * (1 + cellHeight),
+          ((float)x / worldW), ((float)y / worldH),
           cellWidth, cellHeight);*/
       }
       else
