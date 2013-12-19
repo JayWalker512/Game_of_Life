@@ -112,6 +112,8 @@ GLuint BuildShaderProgram(const char *vsPath, const char *fsPath)
 	
 	glDetachShader(tempProgram, vertexShader);
 	glDetachShader(tempProgram, fragmentShader);
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 	
 	return tempProgram;
 }
@@ -194,6 +196,7 @@ char SetQuadShader(QuadDrawData_t *qDrawData, GLuint shader)
 
 void DestroyQuadDrawData(QuadDrawData_t *qDrawData)
 {
+	glDeleteProgram(qDrawData->shader);
 	glDeleteBuffers(1, &qDrawData->vbo);
 	glDeleteVertexArrays(1, &qDrawData->vao);
 

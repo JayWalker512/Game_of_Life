@@ -32,9 +32,7 @@ void ClearQuadDrawData(QuadDrawData_t *qDrawData);
 void DrawRect(QuadDrawData_t *QuadBuffer, 
 	float x, float y, float z, float w, float h); //inserts vertices and indices in buffer
 void WriteVec4(float *floatArr, float x, float y, float z, float w);
-	
 void DrawQuadData(QuadDrawData_t *QuadBuffer, GLuint shader); //does actual GL drawing
-
 float RandFloat(float min, float max);
 
 #endif

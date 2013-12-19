@@ -9,6 +9,10 @@ typedef struct LifeGraphicsContext_s {
 	QuadDrawData_t *pQuadDrawData;
 } LifeGraphicsContext_t;
 
+LifeGraphicsContext_t *CreateLifeGraphicsContext(LifeWorldDim_t w, LifeWorldDim_t h,
+		const char *vertexShaderPath, const char *fragmentShaderPath);
+void DestroyLifeGraphicsContext(LifeGraphicsContext_t *context);
+
 void DrawWorld(SDL_Window *window, LifeGraphicsContext_t *graphicsContext);
 void SyncWorldToScreen(SDL_Window *window, 
 	ThreadWorldContext_t *worldContext, 

@@ -17,15 +17,20 @@ int main(int argc, char **argv)
 
   const LifeWorldDim_t worldWidth = 120;
   const LifeWorldDim_t worldHeight = 80;
-  ThreadWorldContext_t *worldContext = CreateThreadWorldContext(120, 80, 1, 1);
-
-  //create graphics context. Could also be functionalized.
-  LifeGraphicsContext_t graphicsContext;
-  graphicsContext.pWorldRenderBuffer = NewLifeWorld(worldWidth, worldHeight);
-  graphicsContext.pQuadDrawData = NewQuadDataBuffer(worldWidth * worldHeight);
-  if (!SetQuadShader(graphicsContext.pQuadDrawData, BuildShaderProgram("vs1.glsl", "fs1.glsl")))
+  ThreadWorldContext_t *worldContext = CreateThreadWorldContext(worldWidth, worldHeight,
+    1, 1);
+  if (worldContext == NULL)
   {
-    printf("Couldn't set shader!\n");
+    printf("Failed to ThreadWorldContext_t!\n");
+    return 1;
+  }
+
+  LifeGraphicsContext_t *graphicsContext = 
+    CreateLifeGraphicsContext(worldWidth, worldHeight, "vs1.glsl", "fs1.glsl");
+  if (graphicsContext == NULL)
+  {
+    printf("Failed to create LifeGraphicsContext_t!\n");
+    return 1;
   }
 
   //create and start the simulation thread.
@@ -41,7 +46,7 @@ int main(int argc, char **argv)
   while (worldContext->bRunning)
   {
     //Draw world so we can see initial state. 
-    SyncWorldToScreen(window, worldContext, &graphicsContext, 60);
+    SyncWorldToScreen(window, worldContext, graphicsContext, 60);
 
     char bRandomizeWorld = 0;
     worldContext->bRunning = CheckInput(&bRandomizeWorld);
@@ -56,11 +61,7 @@ int main(int argc, char **argv)
   //cleaning up
   SDL_WaitThread(lifeThread, NULL);
   DestroyThreadWorldContext(worldContext);
-
-  //cleaning up graphics context
-  DestroyLifeWorld(graphicsContext.pWorldRenderBuffer);
-  DestroyQuadDrawData(graphicsContext.pQuadDrawData);
-
+  DestroyLifeGraphicsContext(graphicsContext);
   SDL_GL_DeleteContext(glContext);
   SDL_DestroyWindow(window);
   SDL_Quit();

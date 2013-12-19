@@ -1,6 +1,31 @@
 #include "lifegraphics.h"
 #include <SDL2/SDL.h>
 
+LifeGraphicsContext_t *CreateLifeGraphicsContext(LifeWorldDim_t w, LifeWorldDim_t h,
+    const char *vertexShaderPath, const char *fragmentShaderPath)
+{
+  LifeGraphicsContext_t *context = malloc(sizeof(LifeGraphicsContext_t));
+
+  context->pWorldRenderBuffer = NewLifeWorld(w, h);
+  context->pQuadDrawData = NewQuadDataBuffer(w * h);
+  if (!SetQuadShader(context->pQuadDrawData, 
+    BuildShaderProgram(vertexShaderPath, fragmentShaderPath)))
+  {
+    printf("Couldn't build quad shader(s)!\n");
+    DestroyLifeGraphicsContext(context);
+    return NULL;
+  }
+
+  return context;
+}
+
+void DestroyLifeGraphicsContext(LifeGraphicsContext_t *context)
+{
+  DestroyLifeWorld(context->pWorldRenderBuffer);
+  DestroyQuadDrawData(context->pQuadDrawData);
+  free(context);
+}
+
 void SyncWorldToScreen(SDL_Window *window, ThreadWorldContext_t *worldContext, LifeGraphicsContext_t *graphicsContext, int syncRateHz)
 {
   //fair amount of duplicated code here, can be cleaned up?
