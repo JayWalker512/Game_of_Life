@@ -28,10 +28,42 @@ void *ThreadLifeMain(void *worldContext)
 	return NULL;
 }
 
+ThreadWorldContext_t *CreateThreadWorldContext(LifeWorldDim_t w, LifeWorldDim_t h,
+    char bRunning, char bRandomize)
+{
+  ThreadWorldContext_t *context = malloc(sizeof(ThreadWorldContext_t));
+  context->front = NewLifeWorld(w, h);
+  context->back = NewLifeWorld(w, h);
+
+  context->lock = SDL_CreateMutex();
+  if (!context->lock)
+  {
+    printf("Failed to create ThreadWorldContext.lock!\n");
+    DestroyThreadWorldContext(context);
+    return NULL;
+  }
+
+  if (bRandomize)
+    RandomizeWorldStateBinary(context);
+ 
+  context->bRandomize = 0; //we only want to randomize once from here or not at all
+  context->bRunning = bRunning;
+
+  return context;
+}
+
+void DestroyThreadWorldContext(ThreadWorldContext_t *context)
+{
+  DestroyLifeWorld(context->front);
+  DestroyLifeWorld(context->back);
+  SDL_DestroyMutex(context->lock);
+  free(context);
+}
+
 LifeWorld_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height)
 {
   LifeWorld_t *world = malloc(sizeof(LifeWorld_t));
-  world->world = malloc(sizeof(unsigned char) * (width * height));
+  world->world = malloc(sizeof(LifeWorldCell_t) * (width * height));
   world->width = width;
   world->height = height;
 

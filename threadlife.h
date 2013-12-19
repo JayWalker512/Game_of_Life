@@ -21,6 +21,9 @@ typedef struct ThreadWorldContext_s {
 } ThreadWorldContext_t;
 
 void *ThreadLifeMain(void *worldContext);
+ThreadWorldContext_t *CreateThreadWorldContext(LifeWorldDim_t w, LifeWorldDim_t h,
+		char bRunning, char bRandomize);
+void DestroyThreadWorldContext(ThreadWorldContext_t *context);
 LifeWorld_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height);
 void DestroyLifeWorld(LifeWorld_t *world);
 void SwapWorldPointers(LifeWorld_t **front, LifeWorld_t **back);
