@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
-#include <pthread.h>
 #include "main.h"
 #include "threadlife.h"
 #include <SDL2/SDL.h>
@@ -20,10 +19,10 @@ void *ThreadLifeMain(void *worldContext)
 
     if (context->bRandomize)
     {
-    	pthread_mutex_lock(&context->lock);
+    	SDL_LockMutex(context->lock);
     	context->bRandomize = 0;
     	RandomizeWorldStateBinary(context);
-    	pthread_mutex_unlock(&context->lock);
+    	SDL_UnlockMutex(context->lock);
     }
 	}
 	return NULL;
@@ -59,9 +58,9 @@ void SwapWorldPointers(LifeWorld_t **front, LifeWorld_t **back)
 
 void SwapThreadWorldContextPointers(ThreadWorldContext_t *worldContext)
 {
-  pthread_mutex_lock(&worldContext->lock);
+  SDL_LockMutex(worldContext->lock);
   SwapWorldPointers(&worldContext->front, &worldContext->back);
-  pthread_mutex_unlock(&worldContext->lock);
+  SDL_UnlockMutex(worldContext->lock);
 }
 
 void CopyWorld(LifeWorld_t *dest, LifeWorld_t * const source)

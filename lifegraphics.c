@@ -1,5 +1,5 @@
 #include "lifegraphics.h"
-#include <pthread.h>
+#include <SDL2/SDL.h>
 
 void SyncWorldToScreen(SDL_Window *window, ThreadWorldContext_t *worldContext, LifeGraphicsContext_t *graphicsContext, int syncRateHz)
 {
@@ -7,18 +7,18 @@ void SyncWorldToScreen(SDL_Window *window, ThreadWorldContext_t *worldContext, L
   static unsigned long endTime = 0;
   if (syncRateHz <= 0)
   {
-    pthread_mutex_lock(&worldContext->lock);
+    SDL_LockMutex(worldContext->lock);
     CopyWorld(graphicsContext->pWorldRenderBuffer, worldContext->front);
-    pthread_mutex_unlock(&worldContext->lock);
+    SDL_UnlockMutex(worldContext->lock);
 
     DrawWorld(window, graphicsContext);
   }
   else if (SDL_GetTicks() > endTime)
   {
 
-    pthread_mutex_lock(&worldContext->lock);
+    SDL_LockMutex(worldContext->lock);
     CopyWorld(graphicsContext->pWorldRenderBuffer, worldContext->front);
-    pthread_mutex_unlock(&worldContext->lock);
+    SDL_UnlockMutex(worldContext->lock);
 
     DrawWorld(window, graphicsContext);
 

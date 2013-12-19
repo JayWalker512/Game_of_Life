@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
-#include <pthread.h>
 #include "main.h"
 #include "threadlife.h"
 #include "lifegraphics.h"
@@ -14,7 +13,6 @@
 
 int main(int argc, char **argv)
 {
-  //SDL_Surface *screen = CreateWindow(960, 640, "Game of Life", 0);
   SDL_Window *window = InitSDL(960, 600, "Game of Life", 0);
   SDL_GLContext glContext = InitSDL_GL(window);
 
@@ -34,7 +32,13 @@ int main(int argc, char **argv)
     printf("Couldn't set shader!\n");
   }
 
-  if (pthread_mutex_init(&worldContext.lock, NULL) != 0)
+  /*if (pthread_mutex_init(&worldContext.lock, NULL) != 0)
+  {
+    printf("Couldn't init mutex!");
+    return 1;
+  }*/
+  worldContext.lock = SDL_CreateMutex();
+  if (!worldContext.lock)
   {
     printf("Couldn't init mutex!");
     return 1;
@@ -46,11 +50,18 @@ int main(int argc, char **argv)
   worldContext.bRunning = 1;
 
   //here we spawn the thread that will run the simulation
-  pthread_t lifeThread;
+  /*pthread_t lifeThread;
   int err = pthread_create(&lifeThread, NULL, &ThreadLifeMain, &worldContext);
   if (err != 0)
   {
     printf("Couldn't create thread: %s\n", strerror(err));
+    return 1;
+  }*/
+  SDL_Thread *lifeThread = SDL_CreateThread((SDL_ThreadFunction)&ThreadLifeMain, 
+    "SimThread", &worldContext);
+  if (lifeThread == NULL)
+  {
+    printf("Couldn't create thread!\n");
     return 1;
   }
 
@@ -64,15 +75,15 @@ int main(int argc, char **argv)
     worldContext.bRunning = CheckInput(&bRandomizeWorld);
     if (bRandomizeWorld)
     {
-      pthread_mutex_lock(&worldContext.lock);
+      SDL_LockMutex(worldContext.lock);
       worldContext.bRandomize = 1;
-      pthread_mutex_unlock(&worldContext.lock);
+      SDL_UnlockMutex(worldContext.lock);
     }
   }
 
   //cleaning up
-  pthread_join(lifeThread, NULL);
-  pthread_mutex_destroy(&worldContext.lock);
+  SDL_WaitThread(lifeThread, NULL);
+  SDL_DestroyMutex(worldContext.lock);
   DestroyLifeWorld(worldContext.front);
   DestroyLifeWorld(worldContext.back);
   DestroyLifeWorld(graphicsContext.pWorldRenderBuffer);

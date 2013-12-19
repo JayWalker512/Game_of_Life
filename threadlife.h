@@ -1,7 +1,7 @@
 #ifndef THREADLIFE_H
 #define THREADLIFE_H
 
-#include <pthread.h>
+#include <SDL2/SDL.h>
 
 typedef char LifeWorldCell_t;
 typedef long LifeWorldDim_t;
@@ -15,7 +15,7 @@ typedef struct LifeWorld_s {
 typedef struct ThreadWorldContext_s {
 	LifeWorld_t *front;
 	LifeWorld_t *back;
-	pthread_mutex_t lock;
+	SDL_mutex *lock;
 	char bRunning;
 	char bRandomize;
 } ThreadWorldContext_t;
