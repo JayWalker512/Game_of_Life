@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  if (LoadLifeWorld(worldContext->front, "r-pentomino.life", 1) == 0)
+  if (LoadLifeWorld(worldContext->front, "data/gosper-glider-gun.life", 1) == 0)
   {
     printf("Failed to load file!\n");
   }

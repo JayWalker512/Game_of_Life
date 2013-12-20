@@ -53,6 +53,7 @@ char LoadLifeWorld(LifeWorldBuffer_t *dest, const char *file, char bCenter)
 				break;
 		}
 	}
+	printf("\n");
 
 	fclose(fp);
 	return 1;
