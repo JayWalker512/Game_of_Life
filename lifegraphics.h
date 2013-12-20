@@ -5,7 +5,7 @@
 #include "threadlife.h"
 
 typedef struct LifeGraphicsContext_s {
-	LifeWorld_t *pWorldRenderBuffer;
+	LifeWorldBuffer_t *pWorldRenderBuffer;
 	QuadDrawData_t *pQuadDrawData;
 } LifeGraphicsContext_t;
 
@@ -15,7 +15,7 @@ void DestroyLifeGraphicsContext(LifeGraphicsContext_t *context);
 
 void DrawWorld(SDL_Window *window, LifeGraphicsContext_t *graphicsContext);
 void SyncWorldToScreen(SDL_Window *window, 
-	ThreadWorldContext_t *worldContext, 
+	ThreadedLifeContext_t *worldContext, 
 	LifeGraphicsContext_t *graphicsContext,
 	int syncRateHz);
 

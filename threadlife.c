@@ -8,13 +8,13 @@
 
 void *ThreadLifeMain(void *worldContext)
 {
-	ThreadWorldContext_t *context = worldContext;
+	ThreadedLifeContext_t *context = worldContext;
 
 	unsigned long generations = 0;
 	while (context->bRunning)
 	{
     LifeGeneration(context->back, context->front);
-    SwapThreadWorldContextPointers(context);
+    SwapThreadedLifeContextPointers(context);
     generations = DoGensPerSec(generations);
 
     if (context->bRandomize)
@@ -28,18 +28,18 @@ void *ThreadLifeMain(void *worldContext)
 	return NULL;
 }
 
-ThreadWorldContext_t *CreateThreadWorldContext(LifeWorldDim_t w, LifeWorldDim_t h,
+ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
     char bRunning, char bRandomize)
 {
-  ThreadWorldContext_t *context = malloc(sizeof(ThreadWorldContext_t));
+  ThreadedLifeContext_t *context = malloc(sizeof(ThreadedLifeContext_t));
   context->front = NewLifeWorld(w, h);
   context->back = NewLifeWorld(w, h);
 
   context->lock = SDL_CreateMutex();
   if (!context->lock)
   {
-    printf("Failed to create ThreadWorldContext.lock!\n");
-    DestroyThreadWorldContext(context);
+    printf("Failed to create ThreadedLifeContext.lock!\n");
+    DestroyThreadedLifeContext(context);
     return NULL;
   }
 
@@ -52,7 +52,7 @@ ThreadWorldContext_t *CreateThreadWorldContext(LifeWorldDim_t w, LifeWorldDim_t 
   return context;
 }
 
-void DestroyThreadWorldContext(ThreadWorldContext_t *context)
+void DestroyThreadedLifeContext(ThreadedLifeContext_t *context)
 {
   DestroyLifeWorld(context->front);
   DestroyLifeWorld(context->back);
@@ -60,9 +60,9 @@ void DestroyThreadWorldContext(ThreadWorldContext_t *context)
   free(context);
 }
 
-LifeWorld_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height)
+LifeWorldBuffer_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height)
 {
-  LifeWorld_t *world = malloc(sizeof(LifeWorld_t));
+  LifeWorldBuffer_t *world = malloc(sizeof(LifeWorldBuffer_t));
   world->world = malloc(sizeof(LifeWorldCell_t) * (width * height));
   world->width = width;
   world->height = height;
@@ -75,27 +75,27 @@ LifeWorld_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height)
   return world;
 }
 
-void DestroyLifeWorld(LifeWorld_t *world)
+void DestroyLifeWorld(LifeWorldBuffer_t *world)
 {
   free(world->world);
   free(world);
 }
 
-void SwapWorldPointers(LifeWorld_t **front, LifeWorld_t **back)
+void SwapWorldPointers(LifeWorldBuffer_t **front, LifeWorldBuffer_t **back)
 {
-  LifeWorld_t *temp = *front;
+  LifeWorldBuffer_t *temp = *front;
   *front = *back;
   *back = temp;
 }
 
-void SwapThreadWorldContextPointers(ThreadWorldContext_t *worldContext)
+void SwapThreadedLifeContextPointers(ThreadedLifeContext_t *worldContext)
 {
   SDL_LockMutex(worldContext->lock);
   SwapWorldPointers(&worldContext->front, &worldContext->back);
   SDL_UnlockMutex(worldContext->lock);
 }
 
-void CopyWorld(LifeWorld_t *dest, LifeWorld_t * const source)
+void CopyWorld(LifeWorldBuffer_t *dest, LifeWorldBuffer_t * const source)
 {
   //when we implement threading, this will have to lock the source & dest
 	//^this is done by the calling function.
@@ -113,7 +113,7 @@ void CopyWorld(LifeWorld_t *dest, LifeWorld_t * const source)
   }
 }
 
-LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world)
+LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world)
 {
   LifeWorldDim_t wrappedX = x; 
   LifeWorldDim_t wrappedY = y; 
@@ -132,12 +132,12 @@ LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *wo
   return (world->world[(wrappedY * world->width) + wrappedX]);
 }
 
-void SetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world, LifeWorldCell_t state)
+void SetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world, LifeWorldCell_t state)
 {
   world->world[(y * world->width) + x] = state;
 }
 
-void RandomizeWorldStateBinary(ThreadWorldContext_t *worldContext)
+void RandomizeWorldStateBinary(ThreadedLifeContext_t *worldContext)
 {
   /*XXX: Note that rand() and srand() are NOT thread safe! It shouldn't break anything,
     but there is hidden state in use. Will affect random number generation in OTHER threads
@@ -156,7 +156,7 @@ void RandomizeWorldStateBinary(ThreadWorldContext_t *worldContext)
   }
 }
 
-char NumLiveNeighbors(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world)
+char NumLiveNeighbors(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world)
 {
   char numLive = 0;
 
@@ -195,7 +195,7 @@ char NumLiveNeighbors(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorld_t *world)
   return numLive;
 }
 
-LifeWorldCell_t SetWorldState(LifeWorld_t *world, LifeWorldCell_t state)
+LifeWorldCell_t SetWorldState(LifeWorldBuffer_t *world, LifeWorldCell_t state)
 {
   LifeWorldDim_t x = 0;
   LifeWorldDim_t y = 0;
@@ -210,7 +210,7 @@ LifeWorldCell_t SetWorldState(LifeWorld_t *world, LifeWorldCell_t state)
   return state;
 }
 
-void LifeGeneration(LifeWorld_t *newWorld, LifeWorld_t *const oldWorld)
+void LifeGeneration(LifeWorldBuffer_t *newWorld, LifeWorldBuffer_t *const oldWorld)
 {
   SetWorldState(newWorld, 0); //initialize newWorld before we simulate
 

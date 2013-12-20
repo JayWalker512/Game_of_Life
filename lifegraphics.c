@@ -26,7 +26,7 @@ void DestroyLifeGraphicsContext(LifeGraphicsContext_t *context)
   free(context);
 }
 
-void SyncWorldToScreen(SDL_Window *window, ThreadWorldContext_t *worldContext, LifeGraphicsContext_t *graphicsContext, int syncRateHz)
+void SyncWorldToScreen(SDL_Window *window, ThreadedLifeContext_t *worldContext, LifeGraphicsContext_t *graphicsContext, int syncRateHz)
 {
   //fair amount of duplicated code here, can be cleaned up?
   static unsigned long endTime = 0;

@@ -12,16 +12,16 @@
 
 int main(int argc, char **argv)
 {
-  SDL_Window *window = InitSDL(1366, 768, "Game of Life", 0);
+  SDL_Window *window = InitSDL(1024, 768, "Game of Life", 0);
   SDL_GLContext glContext = InitSDL_GL(window);
 
-  const LifeWorldDim_t worldWidth = 120;
-  const LifeWorldDim_t worldHeight = 80;
-  ThreadWorldContext_t *worldContext = CreateThreadWorldContext(worldWidth, worldHeight,
+  const LifeWorldDim_t worldWidth = 400;
+  const LifeWorldDim_t worldHeight = 300;
+  ThreadedLifeContext_t *worldContext = CreateThreadedLifeContext(worldWidth, worldHeight,
     1, 1);
   if (worldContext == NULL)
   {
-    printf("Failed to ThreadWorldContext_t!\n");
+    printf("Failed to ThreadedLifeContext_t!\n");
     return 1;
   }
 
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 
   //cleaning up
   SDL_WaitThread(lifeThread, NULL);
-  DestroyThreadWorldContext(worldContext);
+  DestroyThreadedLifeContext(worldContext);
   DestroyLifeGraphicsContext(graphicsContext);
   SDL_GL_DeleteContext(glContext);
   SDL_DestroyWindow(window);
