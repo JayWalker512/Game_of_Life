@@ -22,7 +22,7 @@ typedef struct ThreadedLifeContext_s {
 
 void *ThreadLifeMain(void *worldContext);
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
-		char bRunning, char bRandomize);
+		char bRandomize, char bRunning);
 void DestroyThreadedLifeContext(ThreadedLifeContext_t *context);
 LifeWorldBuffer_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height);
 void DestroyLifeWorld(LifeWorldBuffer_t *world);

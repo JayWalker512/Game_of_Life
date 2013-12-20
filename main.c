@@ -18,7 +18,7 @@ int main(int argc, char **argv)
   const LifeWorldDim_t worldWidth = 400;
   const LifeWorldDim_t worldHeight = 300;
   ThreadedLifeContext_t *worldContext = CreateThreadedLifeContext(worldWidth, worldHeight,
-    1, 1);
+    0, 1);
   if (worldContext == NULL)
   {
     printf("Failed to ThreadedLifeContext_t!\n");

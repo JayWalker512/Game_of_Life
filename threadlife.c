@@ -29,7 +29,7 @@ void *ThreadLifeMain(void *worldContext)
 }
 
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
-    char bRunning, char bRandomize)
+    char bRandomize, char bRunning)
 {
   ThreadedLifeContext_t *context = malloc(sizeof(ThreadedLifeContext_t));
   context->front = NewLifeWorld(w, h);
