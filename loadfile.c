@@ -2,7 +2,7 @@
 #include "threadlife.h"
 #include <stdio.h>
 
-char LoadLifeWorld(LifeWorldBuffer_t *dest, const char *file)
+char LoadLifeWorld(LifeWorldBuffer_t *dest, const char *file, char bCenter)
 {
 	FILE *fp;
 	fp = fopen(file, "r");
@@ -10,8 +10,18 @@ char LoadLifeWorld(LifeWorldBuffer_t *dest, const char *file)
 	if (fp == NULL)
 		return 0;
 
-	LifeWorldDim_t x = 0;
-	LifeWorldDim_t y = 0;
+	LifeWorldDim_t x, y;
+	if (bCenter == 1)
+	{	
+		x = dest->width / 2;
+		y = dest->height / 2;
+	}
+	else
+	{
+		x = 0;
+		y = 0;
+	}
+
 	int c = 0;
 	puts("Loading file:");
 	while ((c = fgetc(fp)) != EOF)
@@ -31,7 +41,10 @@ char LoadLifeWorld(LifeWorldBuffer_t *dest, const char *file)
 			case '\n':
 				printf("\n");
 				y++;
-				x = 0;
+				if (bCenter)
+					x = dest->width / 2;
+				else
+					x = 0;
 				break;
 			case '!': //this signifies a comment in the file, ignore it.
 				while ((c = fgetc(fp)) != '\n'); //loop to end of line
