@@ -107,8 +107,8 @@ GLuint BuildShaderProgram(const char *vsPath, const char *fsPath)
 		printf("Shader linker failure: %s\n", strInfoLog);
 		return -1;
 	}
-	else
-		puts("Shader linked sucessfully!");
+	//else
+		//puts("Shader linked sucessfully!");
 	
 	glDetachShader(tempProgram, vertexShader);
 	glDetachShader(tempProgram, fragmentShader);
@@ -132,7 +132,7 @@ GLuint CreateShader(GLenum eShaderType, const char *strShaderFile)
 	}
 	shaderSource[i - 1] = '\0';
 	fclose(shaderFile);
-	puts(shaderSource); //print to make sure the string is loaded
+	//puts(shaderSource); //print to make sure the string is loaded
 	
 	GLuint shader = glCreateShader(eShaderType);
 	const char *ss = shaderSource;
@@ -158,11 +158,11 @@ GLuint CreateShader(GLenum eShaderType, const char *strShaderFile)
 			case GL_FRAGMENT_SHADER: sprintf(strShaderType, "fragment"); break;
 		}
 
-		printf("Compile failure in %s shader:\n%s\n", strShaderType, strInfoLog);
+		//printf("Compile failure in %s shader:\n%s\n", strShaderType, strInfoLog);
 		return -1;
 	}
-	else
-		puts("Shader compiled sucessfully!");
+	//else
+		//puts("Shader compiled sucessfully!");
 
 	return shader;
 }

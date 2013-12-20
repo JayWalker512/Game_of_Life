@@ -1,13 +1,14 @@
 //Game of Life
 //Brandon Foltz
 //use this line to compile me:
-//gcc main.c threadlife.c graphics.c lifegraphics.c -o gameoflife -pthread -Wall -std=c99 -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm -Wall -g
+//gcc main.c threadlife.c graphics.c lifegraphics.c loadfile.c -o gameoflife -pthread -Wall -std=c99 -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm -Wall -g
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "main.h"
 #include "threadlife.h"
 #include "lifegraphics.h"
+#include "loadfile.h"
 #include <SDL2/SDL.h>
 
 int main(int argc, char **argv)
@@ -15,14 +16,19 @@ int main(int argc, char **argv)
   SDL_Window *window = InitSDL(1024, 768, "Game of Life", 0);
   SDL_GLContext glContext = InitSDL_GL(window);
 
-  const LifeWorldDim_t worldWidth = 400;
-  const LifeWorldDim_t worldHeight = 300;
+  const LifeWorldDim_t worldWidth = 200;
+  const LifeWorldDim_t worldHeight = 150;
   ThreadedLifeContext_t *worldContext = CreateThreadedLifeContext(worldWidth, worldHeight,
     0, 1);
   if (worldContext == NULL)
   {
     printf("Failed to ThreadedLifeContext_t!\n");
     return 1;
+  }
+
+  if (LoadLifeWorld(worldContext->front, "glider.life") == 0)
+  {
+    printf("Failed to load file!\n");
   }
 
   LifeGraphicsContext_t *graphicsContext = 
