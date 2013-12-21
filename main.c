@@ -13,6 +13,7 @@
 #include "loadfile.h"
 #include <SDL2/SDL.h>
 
+#define MAX_FILENAME_LENGTH 128
 typedef struct LifeArgOptions_s {
   LifeWorldDim_t worldWidth;
   LifeWorldDim_t worldHeight;
@@ -20,6 +21,7 @@ typedef struct LifeArgOptions_s {
   int resY;
   char bFullScreen;
   char bBenchmarking;
+  char lifeFile[MAX_FILENAME_LENGTH];
 } LifeArgOptions_t;
 
 typedef struct KeyPresses_s {
@@ -52,9 +54,12 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  if (LoadLifeWorld(worldContext->front, "data/collision.life", 1) == 0)
+  if (options.lifeFile[0] != '\0')
   {
-    printf("Failed to load file!\n");
+    if (LoadLifeWorld(worldContext->front, options.lifeFile, 1) == 0)
+    {
+      printf("Failed to load file!\n");
+    } 
   }
 
   LifeGraphicsContext_t *graphicsContext = 
@@ -175,10 +180,11 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
   options->worldHeight = 300;
   options->resX = 1024;
   options->resY = 768;
+  options->lifeFile[0] = '\0';
   char *cvalue = NULL;
 
   int c;
-  while ((c = getopt(argc, argv, "x:y:w:h:fb")) != -1 )
+  while ((c = getopt(argc, argv, "l:x:y:w:h:fb")) != -1 )
   {
     switch (c)
     {
@@ -203,6 +209,12 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
       case 'h':
         cvalue = optarg;
         options->worldHeight = atoi(cvalue);
+        break;
+      case 'l':
+        if (strlen(optarg) <= MAX_FILENAME_LENGTH)
+          sprintf(options->lifeFile, "%s", optarg);
+        else
+          puts("Input filename too long!");
         break;
       case '?':
         if (optopt == 'x' || optopt == 'y' || optopt == 'w' || optopt == 'h')
