@@ -24,12 +24,18 @@ void *ThreadLifeMain(void *worldContext)
     	RandomizeWorldStateBinary(context);
     	SDL_UnlockMutex(context->lock);
     }
+
+    /*Quick an dirty way to pause simulation. 
+    Maybe there's a better way with semaphores or something that won't peg
+    all the cores while doing nothing?*/
+    while (!context->bSimulating);
+
 	}
 	return NULL;
 }
 
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
-    char bRandomize, char bRunning)
+    char bRandomize, char bSimulating)
 {
   ThreadedLifeContext_t *context = malloc(sizeof(ThreadedLifeContext_t));
   context->front = NewLifeWorld(w, h);
@@ -47,8 +53,8 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
     RandomizeWorldStateBinary(context);
  
   context->bRandomize = 0; //we only want to randomize once from here or not at all
-  context->bRunning = bRunning;
-
+  context->bSimulating = bSimulating;
+  context->bRunning = 1; //if we're not running, the program is quitting
   return context;
 }
 

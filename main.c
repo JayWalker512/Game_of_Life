@@ -22,7 +22,16 @@ typedef struct LifeArgOptions_s {
   char bBenchmarking;
 } LifeArgOptions_t;
 
-static char CheckInput(char *bRandomizeWorld);
+typedef struct KeyPresses_s {
+  char bEsc;
+  char bSpace;
+  char bR;
+  char bZ;
+} KeyPresses_t;
+
+static void InitializeKeyPresses(KeyPresses_t *keys);
+static char CheckInput(KeyPresses_t *keys);
+static char HandleInput(ThreadedLifeContext_t *context, KeyPresses_t * const keys);
 static char ParseArgs(LifeArgOptions_t *options, int argc, char **argv);
 
 int main(int argc, char **argv)
@@ -72,14 +81,11 @@ int main(int argc, char **argv)
     //Draw world so we can see initial state. 
     SyncWorldToScreen(window, worldContext, graphicsContext, 60);
 
-    char bRandomizeWorld = 0;
-    worldContext->bRunning = CheckInput(&bRandomizeWorld);
-    if (bRandomizeWorld)
-    {
-      SDL_LockMutex(worldContext->lock);
-      worldContext->bRandomize = 1;
-      SDL_UnlockMutex(worldContext->lock);
-    }
+    //input handling
+    KeyPresses_t keys;
+    InitializeKeyPresses(&keys);
+    CheckInput(&keys);
+    HandleInput(worldContext, &keys);
   }
 
   //cleaning up
@@ -93,26 +99,70 @@ int main(int argc, char **argv)
   return 0;
 }
 
-char CheckInput(char *bRandomizeWorld)
+void InitializeKeyPresses(KeyPresses_t *keys)
+{
+  keys->bSpace = 0;
+  keys->bEsc = 0;
+  keys->bR = 0;
+  keys->bZ = 0;
+}
+
+char CheckInput(KeyPresses_t *keys)
 {
   SDL_Event event;
   if (SDL_PollEvent(&event))
   {
     if (event.type == SDL_QUIT)
     {
-      return 0; //return 0 if we want to quit
+      keys->bEsc = 1;
     }
 
     if (event.type == SDL_KEYDOWN)
     {
       if (event.key.keysym.sym == SDLK_ESCAPE)
-        return 0;
+        keys->bEsc = 1;
 
       if (event.key.keysym.sym == SDLK_SPACE)
-        *bRandomizeWorld = 1;
+        keys->bSpace = 1;
+
+      if (event.key.keysym.sym == SDLK_r)
+        keys->bR = 1;
+
+      if (event.key.keysym.sym == SDLK_z)
+        keys->bZ = 1;
     }
   }
 
+  return 1;
+}
+
+static char HandleInput(ThreadedLifeContext_t *context, KeyPresses_t * const keys)
+{
+  if (keys->bZ)
+  {
+    SDL_LockMutex(context->lock);
+    context->bRandomize = 1;
+    SDL_UnlockMutex(context->lock);
+  }
+  if (keys->bR)
+  {
+    //reload the file
+  }
+  if (keys->bSpace)
+  {
+    //pause the simulation or unpause it.
+    if (context->bSimulating)
+      context->bSimulating = 0;
+    else
+      context->bSimulating = 1;
+  }
+  if (keys->bEsc)
+  {
+    //we have to unlock the threads by setting bSimulating to 1 otherwise
+    //they will hang when we try to quit.
+    context->bSimulating = 1;
+    context->bRunning = 0;
+  }
   return 1;
 }
 

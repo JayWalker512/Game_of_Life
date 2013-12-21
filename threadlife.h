@@ -18,11 +18,12 @@ typedef struct ThreadedLifeContext_s {
 	SDL_mutex *lock;
 	char bRunning;
 	char bRandomize;
+	char bSimulating;
 } ThreadedLifeContext_t;
 
 void *ThreadLifeMain(void *worldContext);
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
-		char bRandomize, char bRunning);
+		char bRandomize, char bSimulating);
 void DestroyThreadedLifeContext(ThreadedLifeContext_t *context);
 LifeWorldBuffer_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height);
 void DestroyLifeWorld(LifeWorldBuffer_t *world);
