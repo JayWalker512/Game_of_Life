@@ -16,8 +16,8 @@ int main(int argc, char **argv)
   SDL_Window *window = InitSDL(1024, 768, "Game of Life", 0);
   SDL_GLContext glContext = InitSDL_GL(window);
 
-  const LifeWorldDim_t worldWidth = 200;
-  const LifeWorldDim_t worldHeight = 150;
+  const LifeWorldDim_t worldWidth = 400;
+  const LifeWorldDim_t worldHeight = 300;
   ThreadedLifeContext_t *worldContext = CreateThreadedLifeContext(worldWidth, worldHeight,
     0, 1);
   if (worldContext == NULL)
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  if (LoadLifeWorld(worldContext->front, "data/gosper-glider-gun.life", 1) == 0)
+  if (LoadLifeWorld(worldContext->front, "data/collision.life", 1) == 0)
   {
     printf("Failed to load file!\n");
   }
