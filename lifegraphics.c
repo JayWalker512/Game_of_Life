@@ -61,11 +61,7 @@ void SyncWorldToScreen(SDL_Window *window, ThreadedLifeContext_t *worldContext, 
 
 void DrawWorld(SDL_Window *window, LifeGraphicsContext_t *graphicsContext)
 {
-  //clear screen first
-  glClearColor(0.1, 0.0, 0.0, 0.0);
-  glClearDepth(1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+  ClearScreen(0.1, 0.0, 0.0);
   int worldW, worldH;
   worldW = graphicsContext->pWorldRenderBuffer->width;
   worldH =  graphicsContext->pWorldRenderBuffer->height;

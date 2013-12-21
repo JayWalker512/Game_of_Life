@@ -307,3 +307,10 @@ float RandFloat(float min, float max)
 {
 	return min + (float)rand()/((float)RAND_MAX/max);
 }
+
+void ClearScreen(float r, float g, float b)
+{	
+	glClearColor(r, g, b, 0.0);
+  glClearDepth(1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
