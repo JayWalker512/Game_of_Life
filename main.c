@@ -63,8 +63,7 @@ int main(int argc, char **argv)
   }
 
   LifeGraphicsContext_t *graphicsContext = 
-    CreateLifeGraphicsContext(options.worldWidth, options.worldHeight,
-    "shaders/vs1.glsl", "shaders/fs1.glsl");
+    CreateLifeGraphicsContext(options.worldWidth, options.worldHeight);
   if (graphicsContext == NULL)
   {
     printf("Failed to create LifeGraphicsContext_t!\n");

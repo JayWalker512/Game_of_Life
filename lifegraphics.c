@@ -5,8 +5,7 @@
 Just high level draw calls. Low level stuff should be compartmentalized in
 graphics.c or alike. */
 
-LifeGraphicsContext_t *CreateLifeGraphicsContext(LifeWorldDim_t w, LifeWorldDim_t h,
-    const char *vertexShaderPath, const char *fragmentShaderPath)
+LifeGraphicsContext_t *CreateLifeGraphicsContext(LifeWorldDim_t w, LifeWorldDim_t h)
 {
   LifeGraphicsContext_t *context = malloc(sizeof(LifeGraphicsContext_t));
 
@@ -17,7 +16,7 @@ LifeGraphicsContext_t *CreateLifeGraphicsContext(LifeWorldDim_t w, LifeWorldDim_
   data, just let high-level code refer to it in a high-level way.*/
   context->pQuadDrawData = NewQuadDataBuffer(w * h);
   if (!SetQuadShader(context->pQuadDrawData, 
-    BuildShaderProgram(vertexShaderPath, fragmentShaderPath)))
+    BuildShaderProgram("shaders/vs1.glsl", "shaders/fs1.glsl"))) //default shaders
   {
     printf("Couldn't build quad shader(s)!\n");
     DestroyLifeGraphicsContext(context);
