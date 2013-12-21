@@ -1,9 +1,11 @@
 //Game of Life
 //Brandon Foltz
 //use this line to compile me:
-//gcc main.c threadlife.c graphics.c lifegraphics.c loadfile.c -o gameoflife -pthread -Wall -std=c99 -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm -Wall -g
+//gcc main.c threadlife.c graphics.c lifegraphics.c loadfile.c -o gameoflife -pthread -Wall -pedantic -std=c99 -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm -Wall -g
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <assert.h>
 #include "main.h"
 #include "threadlife.h"
@@ -11,14 +13,29 @@
 #include "loadfile.h"
 #include <SDL2/SDL.h>
 
+typedef struct LifeArgOptions_s {
+  LifeWorldDim_t worldWidth;
+  LifeWorldDim_t worldHeight;
+  int resX;
+  int resY;
+  char bFullScreen;
+  char bBenchmarking;
+} LifeArgOptions_t;
+
+static char CheckInput(char *bRandomizeWorld);
+static char ParseArgs(LifeArgOptions_t *options, int argc, char **argv);
+
 int main(int argc, char **argv)
 {
-  SDL_Window *window = InitSDL(1024, 768, "Game of Life", 0);
+  LifeArgOptions_t options;
+  ParseArgs(&options, argc, argv);
+
+  SDL_Window *window = InitSDL(options.resX, options.resY, 
+    "Game of Life", options.bFullScreen);
   SDL_GLContext glContext = InitSDL_GL(window);
 
-  const LifeWorldDim_t worldWidth = 400;
-  const LifeWorldDim_t worldHeight = 300;
-  ThreadedLifeContext_t *worldContext = CreateThreadedLifeContext(worldWidth, worldHeight,
+  ThreadedLifeContext_t *worldContext = 
+    CreateThreadedLifeContext(options.worldWidth, options.worldHeight,
     0, 1);
   if (worldContext == NULL)
   {
@@ -32,7 +49,8 @@ int main(int argc, char **argv)
   }
 
   LifeGraphicsContext_t *graphicsContext = 
-    CreateLifeGraphicsContext(worldWidth, worldHeight, "vs1.glsl", "fs1.glsl");
+    CreateLifeGraphicsContext(options.worldWidth, options.worldHeight,
+    "vs1.glsl", "fs1.glsl");
   if (graphicsContext == NULL)
   {
     printf("Failed to create LifeGraphicsContext_t!\n");
@@ -95,5 +113,60 @@ char CheckInput(char *bRandomizeWorld)
     }
   }
 
+  return 1;
+}
+
+char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
+{
+  //set default options first, then parse for changes.
+  options->bFullScreen = 0;
+  options->bBenchmarking = 0;
+  options->worldWidth = 400;
+  options->worldHeight = 300;
+  options->resX = 1024;
+  options->resY = 768;
+  char *cvalue = NULL;
+
+  int c;
+  while ((c = getopt(argc, argv, "x:y:w:h:fb")) != -1 )
+  {
+    switch (c)
+    {
+      case 'f':
+        options->bFullScreen = 1;
+        break;
+      case 'b':
+        options->bBenchmarking = 1;
+        break;
+      case 'x':
+        cvalue = optarg;
+        options->resX = atoi(cvalue);
+        break;
+      case 'y':
+        cvalue = optarg;
+        options->resY = atoi(cvalue);
+        break;
+      case 'w':
+        cvalue = optarg;
+        options->worldWidth = atoi(cvalue);
+        break;
+      case 'h':
+        cvalue = optarg;
+        options->worldHeight = atoi(cvalue);
+        break;
+      case '?':
+        if (optopt == 'x' || optopt == 'y' || optopt == 'w' || optopt == 'h')
+          fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+        else if (isprint (optopt))
+          fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+        else
+          fprintf (stderr,
+            "Unknown option character `\\x%x'.\n",
+            optopt);
+      default:
+        puts("What's going on in here?!?!");
+        break;
+    }
+  }
   return 1;
 }
