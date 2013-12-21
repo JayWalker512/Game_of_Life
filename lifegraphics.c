@@ -1,12 +1,20 @@
 #include "lifegraphics.h"
 #include <SDL2/SDL.h>
 
+/* Ideally there wouldn't be any GL calls or low-level backend type stuff here.
+Just high level draw calls. Low level stuff should be compartmentalized in
+graphics.c or alike. */
+
 LifeGraphicsContext_t *CreateLifeGraphicsContext(LifeWorldDim_t w, LifeWorldDim_t h,
     const char *vertexShaderPath, const char *fragmentShaderPath)
 {
   LifeGraphicsContext_t *context = malloc(sizeof(LifeGraphicsContext_t));
 
   context->pWorldRenderBuffer = NewLifeWorld(w, h);
+
+  /*drawing related data could be referred to with an int that is mapped internally
+  in the graphics code, like how gl does things. Don't give access to raw low-level
+  data, just let high-level code refer to it in a high-level way.*/
   context->pQuadDrawData = NewQuadDataBuffer(w * h);
   if (!SetQuadShader(context->pQuadDrawData, 
     BuildShaderProgram(vertexShaderPath, fragmentShaderPath)))

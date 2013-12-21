@@ -1,5 +1,11 @@
 #include "graphics.h"
 
+static float *AllocateQuadArray(const int numQuads); //used in NewQuadDataBuffer
+static GLuint *AllocateIndexArray(const int numQuads); //used in NewQuadDataBuffer
+static GLuint CreateShader(GLenum eShaderType, const char *strShaderFile);
+static void WriteVec4(float *floatArr, float x, float y, float z, float w);
+static float RandFloat(float min, float max);
+
 SDL_Window *InitSDL(int winWidth, int winHeight, const char *title, char bFull)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
