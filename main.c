@@ -1,7 +1,7 @@
 //Game of Life
 //Brandon Foltz
 //use this line to compile me:
-//gcc main.c threadlife.c graphics.c lifegraphics.c loadfile.c -o gameoflife -std=c99 -Wall -Wmissing-prototypes -Wmissing-declarations -Wimplicit-function-declaration -Wstrict-prototypes -Wextra -g -D_GNU_SOURCE -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm
+//gcc main.c threadlife.c graphics.c lifegraphics.c loadfile.c -o gameoflife -std=c99 -Wall -Wextra -pedantic -g -D_GNU_SOURCE -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,7 +13,6 @@
 #include "loadfile.h"
 #include <SDL2/SDL.h>
 
-#define MAX_FILENAME_LENGTH 128
 typedef struct LifeArgOptions_s {
   LifeWorldDim_t worldWidth;
   LifeWorldDim_t worldHeight;
@@ -47,22 +46,11 @@ int main(int argc, char **argv)
 
   ThreadedLifeContext_t *worldContext = 
     CreateThreadedLifeContext(options.worldWidth, options.worldHeight,
-    0, 1);
+    0, 1, options.lifeFile);
   if (worldContext == NULL)
   {
     printf("Failed to ThreadedLifeContext_t!\n");
     return 1;
-  }
-
-  /* TODO: move file loading to CreateThreadedLifeContext as an optional string param. 
-  to load from file. Store filename in created context. Reloading function in main can
-  then know which file to load from the context. */
-  if (options.lifeFile[0] != '\0')
-  {
-    if (LoadLifeWorld(worldContext->front, options.lifeFile, 1) == 0)
-    {
-      printf("Failed to load file!\n");
-    } 
   }
 
   LifeGraphicsContext_t *graphicsContext = 
@@ -154,7 +142,9 @@ static char HandleInput(ThreadedLifeContext_t *context, KeyPresses_t * const key
   if (keys->bR)
   {
     //reload the file
-    
+    SDL_LockMutex(context->lock);
+    context->bReloadFile = 1;
+    SDL_UnlockMutex(context->lock);
   }
   if (keys->bSpace)
   {

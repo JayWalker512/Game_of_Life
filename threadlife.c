@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "main.h"
 #include "threadlife.h"
+#include "loadfile.h"
 #include <SDL2/SDL.h>
 
 void *ThreadLifeMain(void *worldContext)
@@ -17,12 +18,24 @@ void *ThreadLifeMain(void *worldContext)
     SwapThreadedLifeContextPointers(context);
     generations = DoGensPerSec(generations);
 
+    /* Should these be atomic check/changes? If two threads see a randomize/reload request
+    and one locks, the other will wait to lock until the other finishes and then repeat
+    the same operation. Fine with one thread, not with more. */
     if (context->bRandomize)
     {
     	SDL_LockMutex(context->lock);
     	context->bRandomize = 0;
     	RandomizeWorldStateBinary(context);
     	SDL_UnlockMutex(context->lock);
+    }
+
+    if (context->bReloadFile)
+    {
+      SDL_LockMutex(context->lock);
+      context->bReloadFile = 0;
+      ClearWorldBuffer(context->front, 0);
+      LoadLifeWorld(context->front, context->lifeFile, 1);
+      SDL_UnlockMutex(context->lock);
     }
 
     /*Quick an dirty way to pause simulation. 
@@ -35,7 +48,7 @@ void *ThreadLifeMain(void *worldContext)
 }
 
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
-    char bRandomize, char bSimulating)
+    char bRandomize, char bSimulating, const char *lifeFile)
 {
   ThreadedLifeContext_t *context = malloc(sizeof(ThreadedLifeContext_t));
   context->front = NewLifeWorld(w, h);
@@ -51,7 +64,23 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
 
   if (bRandomize)
     RandomizeWorldStateBinary(context);
+
+  context->lifeFile = malloc(sizeof(char) * MAX_FILENAME_LENGTH);
+  context->lifeFile[0] = '\0'; 
+  if (lifeFile[0] != '\0')
+  {
+    if (LoadLifeWorld(context->front, lifeFile, 1) == 0)
+    {
+      printf("Failed to load file!\n");
+    } 
+    else
+    {
+      //maybe LoadLifeWorld should point to a context to fill this automatically?
+      snprintf(context->lifeFile, MAX_FILENAME_LENGTH, "%s", lifeFile);
+    }
+  }
  
+  context->bReloadFile = 0;
   context->bRandomize = 0; //we only want to randomize once from here or not at all
   context->bSimulating = bSimulating;
   context->bRunning = 1; //if we're not running, the program is quitting
@@ -60,6 +89,7 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
 
 void DestroyThreadedLifeContext(ThreadedLifeContext_t *context)
 {
+  free(context->lifeFile);
   DestroyLifeWorld(context->front);
   DestroyLifeWorld(context->back);
   SDL_DestroyMutex(context->lock);
@@ -141,6 +171,19 @@ LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer
 void SetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world, LifeWorldCell_t state)
 {
   world->world[(y * world->width) + x] = state;
+}
+
+void ClearWorldBuffer(LifeWorldBuffer_t *world, LifeWorldCell_t state)
+{
+  LifeWorldDim_t x = 0;
+  LifeWorldDim_t y = 0;
+  for (y = 0; y < world->height; y++)
+  {
+    for (x = 0; x < world->width; x++)
+    {
+      SetCellState(x, y, world, state); //set to zero first so no leftover state
+    }
+  }
 }
 
 void RandomizeWorldStateBinary(ThreadedLifeContext_t *worldContext)
