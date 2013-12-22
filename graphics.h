@@ -3,7 +3,6 @@
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
-#include <stdlib.h>
 
 typedef struct QuadDrawData_s {
 	float *vertexArray;

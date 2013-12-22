@@ -1,4 +1,6 @@
 #include "graphics.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 static float *AllocateQuadArray(const int numQuads); //used in NewQuadDataBuffer
 static GLuint *AllocateIndexArray(const int numQuads); //used in NewQuadDataBuffer

@@ -1,5 +1,7 @@
 #include "lifegraphics.h"
 #include <SDL2/SDL.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /* Ideally there wouldn't be any GL calls or low-level backend type stuff here.
 Just high level draw calls. Low level stuff should be compartmentalized in

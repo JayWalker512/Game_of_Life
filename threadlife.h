@@ -36,6 +36,7 @@ void SetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world, 
 
 LifeWorldCell_t SetWorldState(LifeWorldBuffer_t *world, LifeWorldCell_t state);
 void RandomizeWorldStateBinary(ThreadedLifeContext_t *worldContext);
+char NumLiveNeighbors(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world);
 void LifeGeneration(LifeWorldBuffer_t *newWorld, LifeWorldBuffer_t *const oldWorld);
 unsigned long DoGensPerSec(unsigned long gens);
 
