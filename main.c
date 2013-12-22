@@ -54,6 +54,9 @@ int main(int argc, char **argv)
     return 1;
   }
 
+  /* TODO: move file loading to CreateThreadedLifeContext as an optional string param. 
+  to load from file. Store filename in created context. Reloading function in main can
+  then know which file to load from the context. */
   if (options.lifeFile[0] != '\0')
   {
     if (LoadLifeWorld(worldContext->front, options.lifeFile, 1) == 0)
@@ -151,6 +154,7 @@ static char HandleInput(ThreadedLifeContext_t *context, KeyPresses_t * const key
   if (keys->bR)
   {
     //reload the file
+    
   }
   if (keys->bSpace)
   {
