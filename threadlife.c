@@ -7,7 +7,7 @@
 #include "loadfile.h"
 #include <SDL2/SDL.h>
 
-void *ThreadLifeMain(void *worldContext)
+void ThreadLifeMain(void *worldContext)
 {
 	ThreadedLifeContext_t *context = worldContext;
 
@@ -44,7 +44,6 @@ void *ThreadLifeMain(void *worldContext)
     while (!context->bSimulating);
 
 	}
-	return NULL;
 }
 
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,

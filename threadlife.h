@@ -23,7 +23,7 @@ typedef struct ThreadedLifeContext_s {
 	char bSimulating;
 } ThreadedLifeContext_t;
 
-void *ThreadLifeMain(void *worldContext);
+void ThreadLifeMain(void *worldContext);
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
 		char bRandomize, char bSimulating, const char *lifeFile); //pass "" or otherwise NULL to lifeFile to ignore argument.
 void DestroyThreadedLifeContext(ThreadedLifeContext_t *context);
