@@ -9,5 +9,5 @@ typedef struct Stack_s {
 void StackInit(Stack_t *Stack, int maxSize);
 int StackPush(Stack_t *Stack, stackElement_t input);
 stackElement_t StackPop(Stack_t *Stack);
-const int StackIsFull(Stack_t *Stack);
-const int StackIsEmpty(Stack_t *Stack);
+int StackIsFull(Stack_t *Stack);
+int StackIsEmpty(Stack_t *Stack);

@@ -33,7 +33,7 @@ void StackInit(Stack_t *Stack, int maxSize)
 
 int StackPush(Stack_t *Stack, stackElement_t input)
 {
-	if(!(stackIsFull(Stack)))
+	if(!(StackIsFull(Stack)))
 	{
 		Stack->index++;
 		Stack->contents[Stack->index] = input;
@@ -48,7 +48,7 @@ int StackPush(Stack_t *Stack, stackElement_t input)
 
 stackElement_t StackPop(Stack_t *Stack)
 {
-	if (!(stackIsEmpty(Stack)))
+	if (!(StackIsEmpty(Stack)))
 	{
 		stackElement_t popVal;
 		popVal = Stack->contents[Stack->index];
@@ -63,7 +63,7 @@ stackElement_t StackPop(Stack_t *Stack)
 	return -1;
 }
 
-const int StackIsFull(Stack_t *Stack)
+int StackIsFull(Stack_t *Stack)
 {
 	if (Stack->index == Stack->maxSize - 1)
 		return 1;
@@ -74,7 +74,7 @@ const int StackIsFull(Stack_t *Stack)
 	return -1;
 }
 
-const int StackIsEmpty(Stack_t *Stack)
+int StackIsEmpty(Stack_t *Stack)
 {
 	if (Stack->index == -1)
 		return 1;

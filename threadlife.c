@@ -5,7 +5,7 @@
 #include "main.h"
 #include "threadlife.h"
 #include "loadfile.h"
-#include <SDL2/SDL.h>
+#include "stack.h"
 
 #if 0
 void ThreadLifeMain(void *worldContext)
@@ -52,8 +52,10 @@ void ThreadLifeMain(void *worldContext)
 {
   ThreadedLifeContext_t *context = worldContext;
 
-  //IntStack_t *copyBlockQueue = NewIntStack(NumRegions(context->frontRegions));
-  //IntStack_t *simBlockQueue = NewIntStack(NumRegions(context->frontRegions));
+  Stack_t copyBlockQueue;
+  Stack_t simBlockQueue;
+  StackInit(&copyBlockQueue, NumRegions(context->frontRegions));
+  StackInit(&simBlockQueue, NumRegions(context->frontRegions));
 
   unsigned long generations = 0;
   while (context->bRunning)
@@ -80,16 +82,29 @@ void ThreadLifeMain(void *worldContext)
     /*SwapThreadedLifeContextWorldBufferPointers(context);
     SwapThreadedLifeContextDirtyRegionPointers(context);*/
 
-    //generations = DoGensPerSec(generations);
+    generations = DoGensPerSec(generations);
   }
 }
 
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
-    char bRandomize, char bSimulating, const char *lifeFile)
+    int regionSize, char bRandomize, char bSimulating, const char *lifeFile)
 {
   ThreadedLifeContext_t *context = malloc(sizeof(ThreadedLifeContext_t));
-  context->front = NewLifeWorld(w, h);
-  context->back = NewLifeWorld(w, h);
+
+  LifeWorldDim_t scaledWidth = w;
+  LifeWorldDim_t scaledHeight = h;
+
+  while (scaledWidth % regionSize != 0)
+    scaledWidth++;
+
+  while (scaledHeight % regionSize != 0)
+    scaledHeight++;
+
+  //w and h MUST be multples of regionSquareDims for things to work!
+  context->front = NewLifeWorld(scaledWidth, scaledHeight);
+  context->back = NewLifeWorld(scaledWidth, scaledHeight);
+  context->frontRegions = NewDirtyRegionBuffer(regionSize, scaledWidth, scaledHeight);
+  context->backRegions = NewDirtyRegionBuffer(regionSize, scaledWidth, scaledHeight);
 
   context->lock = SDL_CreateMutex();
   if (!context->lock)
@@ -129,6 +144,8 @@ void DestroyThreadedLifeContext(ThreadedLifeContext_t *context)
   free(context->lifeFile);
   DestroyLifeWorld(context->front);
   DestroyLifeWorld(context->back);
+  DestroyDirtyRegionBuffer(context->frontRegions);
+  DestroyDirtyRegionBuffer(context->backRegions);
   SDL_DestroyMutex(context->lock);
   free(context);
 }

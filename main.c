@@ -1,7 +1,7 @@
 //Game of Life
 //Brandon Foltz
 //use this line to compile me:
-//gcc main.c threadlife.c graphics.c lifegraphics.c loadfile.c dirtyregion.c -o gameoflife -std=c99 -Wall -Wextra -pedantic -g -D_GNU_SOURCE -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm
+//gcc main.c threadlife.c graphics.c lifegraphics.c loadfile.c dirtyregion.c stack.c -o gameoflife -std=c99 -Wall -Wextra -pedantic -g -D_GNU_SOURCE -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 
   ThreadedLifeContext_t *worldContext = 
     CreateThreadedLifeContext(options.worldWidth, options.worldHeight,
-    0, 1, options.lifeFile);
+    8, 0, 1, options.lifeFile); //default block size of 8 for now
   if (worldContext == NULL)
   {
     printf("Failed to ThreadedLifeContext_t!\n");
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
   }
 
   LifeGraphicsContext_t *graphicsContext = 
-    CreateLifeGraphicsContext(options.worldWidth, options.worldHeight);
+    CreateLifeGraphicsContext(worldContext->front->width, worldContext->front->height);
   if (graphicsContext == NULL)
   {
     printf("Failed to create LifeGraphicsContext_t!\n");
