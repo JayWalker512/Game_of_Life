@@ -31,6 +31,11 @@ void StackInit(Stack_t *Stack, int maxSize)
 		Stack->contents[i] = 0;
 }
 
+void DestroyStack(Stack_t *Stack)
+{
+	free(Stack->contents);
+}
+
 int StackPush(Stack_t *Stack, stackElement_t input)
 {
 	if(!(StackIsFull(Stack)))

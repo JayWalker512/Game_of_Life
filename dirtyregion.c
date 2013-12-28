@@ -36,11 +36,11 @@ static int GetRegionFromCoords(DirtyRegionBuffer_t *buffer, const int x, const i
 #ifdef TESTCASE
 int main()
 {
-	DirtyRegionBuffer_t *buf = NewDirtyRegionBuffer(8, 16, 16);
-	int region = 1;
+	DirtyRegionBuffer_t *buf = NewDirtyRegionBuffer(8, 400, 300);
+	int region = 1899;
 	int x, y, w, h;
 	GetRegionSourceDims(buf, region, &x, &y, &w, &h);
-	printf("Region ULeft src coords (%d,%d) at %dx%d with %d regions. \n",x,y,w,h,NumRegions(buf));
+	printf("Region %d ULeft src coords (%d,%d) at %dx%d with %d regions. \n",region,x,y,w,h,NumRegions(buf));
 
 	int inX = 17;
 	int inY = 7;
@@ -61,6 +61,8 @@ DirtyRegionBuffer_t *NewDirtyRegionBuffer(const int regionSquareDims, const int 
 
 	while (scaledSrcHeight % regionSquareDims != 0)
 		scaledSrcHeight++;
+
+	printf("Scaled sizes: %d, %d\n", scaledSrcWidth, scaledSrcHeight);
 
 	int widthInRegions = scaledSrcWidth / regionSquareDims;
 	int heightInRegions = scaledSrcHeight / regionSquareDims;
@@ -88,10 +90,10 @@ int MarkDirtyRegion(DirtyRegionBuffer_t *buffer, const int x, const int y)
 }
 
 //clears region values to 0
-void ClearDirtyRegions(DirtyRegionBuffer_t *buffer)
+void ClearDirtyRegionBuffer(DirtyRegionBuffer_t *buffer, int state)
 {
 	for (int i = 0; i < buffer->numRegions; i++)
-		buffer->buffer[i] = 0;
+		buffer->buffer[i] = state;
 }
 
 //returns the number of regions from the subdivided source area
@@ -110,12 +112,12 @@ int GetRegionValue(DirtyRegionBuffer_t *buffer, const int region)
 //the parameters passed in.
 int GetRegionSourceDims(const DirtyRegionBuffer_t *buffer, const int region, int *x, int *y, int *w, int *h)
 {
-	*w = buffer->srcWidth / buffer->regionSquareDims;
-	*h = buffer->srcHeight / buffer->regionSquareDims;
+	*w = buffer->regionSquareDims;
+	*h = buffer->regionSquareDims;
 	int widthInRegions = buffer->srcWidth / buffer->regionSquareDims;
-	int heightInRegions = buffer->srcHeight / buffer->regionSquareDims;
+	//int heightInRegions = buffer->srcHeight / buffer->regionSquareDims;
 	*x = (region % widthInRegions) * buffer->regionSquareDims; 
-	*y = (region / heightInRegions) * buffer->regionSquareDims;
+	*y = (region / widthInRegions) * buffer->regionSquareDims;
 
 	return region;
 

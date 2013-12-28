@@ -7,6 +7,54 @@
 #include "loadfile.h"
 #include "stack.h"
 
+/* STATIC FUNCTIONS DECLARED AND DEFINED HERE! */
+
+static void BuildCopyAndSimBlockQueues(Stack_t *copyBlockQueue, Stack_t *simBlockQueue, DirtyRegionBuffer_t *dirtyRegions)
+{
+  for (int i = 0; i < NumRegions(dirtyRegions); i++)
+  {
+    if (GetRegionValue(dirtyRegions, i))
+      StackPush(simBlockQueue, i);
+    else
+      StackPush(copyBlockQueue, i);
+  }
+}
+
+static void CopyWorldBlock(LifeWorldBuffer_t *dest, LifeWorldBuffer_t *src, int x, int y, int w, int h)
+{
+  /*Much slower than doing a lower level memory->memory copy, but easier to read... */
+  for (int iterY = y; iterY < y + h; iterY++)
+  {
+    for (int iterX = x; iterX < x + w; iterX++)
+    {
+      if (GetCellState(iterX, iterY, src))
+        SetCellState(iterX, iterY, dest, 1);
+      else
+        SetCellState(iterX, iterY, dest, 0);
+    }
+  }
+}
+
+static int CopyWorldBlocksFromQueue(LifeWorldBuffer_t *front, LifeWorldBuffer_t *back, 
+  DirtyRegionBuffer_t * const dirtyRegionsReference, Stack_t *copyBlockQueue)
+{
+  int blocksCopied = 0; //we return this value from this func
+  while(!StackIsEmpty(copyBlockQueue))
+  {
+    int region = StackPop(copyBlockQueue);
+    int x = 0;
+    int y = 0;
+    int dim = 0;
+    GetRegionSourceDims(dirtyRegionsReference, region, &x, &y, &dim, &dim);
+    printf("Copying region %d at %d,%d being %d dimensions\n", region, x, y, dim);
+    CopyWorldBlock(front, back, x, y, dim, dim);
+    blocksCopied++;
+  }
+  return blocksCopied;
+}
+
+/* PUBLIC FUNCTIONS BEGIN HERE */
+
 #if 0
 void ThreadLifeMain(void *worldContext)
 {
@@ -69,21 +117,27 @@ void ThreadLifeMain(void *worldContext)
     would be slower. Why do in two passes what we can in one? */
     /* These queues SHOULD be empty when we get back here, removing need to clear
     them. Perhaps there should be more error checking/robustness involved.*/
-    /*BuildCopyAndSimBlockQueues(copyBlockQueue, simBlockQueue, context->frontRegions);*/
+    /* Do we even need to explicitly copy blocks that aren't being simulated? 
+    Won't they be the same anyway? */
+    BuildCopyAndSimBlockQueues(&copyBlockQueue, &simBlockQueue, context->frontRegions);
+    ClearDirtyRegionBuffer(context->backRegions, 0);
 
     /* Copies blocks in front to back based on copyBlockQueue */
-    /*CopyBlocksFromQueue(context->back, context->front, 
-        context->frontRegions, copyBlockQueue);*/
+    CopyWorldBlocksFromQueue(context->back, context->front, 
+        context->frontRegions, &copyBlockQueue);
     
-    /*SimBlocksFromQueue(context->back, context->backRegions, 
-        context->front, context->frontRegions, simBlockQueue);*/
+    /*SimWorldBlocksFromQueue(context->back, context->backRegions, 
+        context->front, context->frontRegions, &simBlockQueue);*/
 
     //renamed version of SwapThreadedLifeContextPointers()
-    /*SwapThreadedLifeContextWorldBufferPointers(context);
-    SwapThreadedLifeContextDirtyRegionPointers(context);*/
+    SwapThreadedLifeContextWorldBufferPointers(context); //locks are MAD slow
+    SwapThreadedLifeContextDirtyRegionPointers(context);
 
     generations = DoGensPerSec(generations);
   }
+
+  DestroyStack(&copyBlockQueue);
+  DestroyStack(&simBlockQueue);
 }
 
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
@@ -105,6 +159,10 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
   context->back = NewLifeWorld(scaledWidth, scaledHeight);
   context->frontRegions = NewDirtyRegionBuffer(regionSize, scaledWidth, scaledHeight);
   context->backRegions = NewDirtyRegionBuffer(regionSize, scaledWidth, scaledHeight);
+
+  //init front to dirty so we must simulate ALL cells first gen
+  ClearDirtyRegionBuffer(context->frontRegions, 1); 
+  ClearDirtyRegionBuffer(context->backRegions, 0);
 
   context->lock = SDL_CreateMutex();
   if (!context->lock)
@@ -178,10 +236,24 @@ void SwapWorldPointers(LifeWorldBuffer_t **front, LifeWorldBuffer_t **back)
   *back = temp;
 }
 
-void SwapThreadedLifeContextPointers(ThreadedLifeContext_t *worldContext)
+void SwapDirtyRegionPointers(DirtyRegionBuffer_t **front, DirtyRegionBuffer_t **back)
+{
+  DirtyRegionBuffer_t *temp = *front;
+  *front = *back;
+  *back = temp;
+}
+
+void SwapThreadedLifeContextWorldBufferPointers(ThreadedLifeContext_t *worldContext)
 {
   SDL_LockMutex(worldContext->lock);
   SwapWorldPointers(&worldContext->front, &worldContext->back);
+  SDL_UnlockMutex(worldContext->lock);
+}
+
+void SwapThreadedLifeContextDirtyRegionPointers(ThreadedLifeContext_t *worldContext)
+{
+  SDL_LockMutex(worldContext->lock);
+  SwapDirtyRegionPointers(&worldContext->frontRegions, &worldContext->backRegions);
   SDL_UnlockMutex(worldContext->lock);
 }
 
@@ -224,6 +296,8 @@ LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer
 
 void SetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world, LifeWorldCell_t state)
 {
+  //Can easily cause memory corruption if incorrect params are passed in...
+  //Maybe it should implement wrapping?
   world->world[(y * world->width) + x] = state;
 }
 

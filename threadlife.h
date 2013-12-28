@@ -32,12 +32,14 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
 void DestroyThreadedLifeContext(ThreadedLifeContext_t *context);
 LifeWorldBuffer_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height);
 void DestroyLifeWorld(LifeWorldBuffer_t *world);
-void SwapWorldPointers(LifeWorldBuffer_t **front, LifeWorldBuffer_t **back);
-void SwapThreadedLifeContextPointers(ThreadedLifeContext_t *worldContext);
+void SwapWorldPointers(LifeWorldBuffer_t **front, LifeWorldBuffer_t **back); //can be static
+void SwapDirtyRegionPointers(DirtyRegionBuffer_t **front, DirtyRegionBuffer_t **back);
+void SwapThreadedLifeContextWorldBufferPointers(ThreadedLifeContext_t *worldContext);
+void SwapThreadedLifeContextDirtyRegionPointers(ThreadedLifeContext_t *worldContext);
 void CopyWorld(LifeWorldBuffer_t *dest, LifeWorldBuffer_t * const source);
 
 LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world);
-void SetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world, LifeWorldCell_t);
+void SetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world, LifeWorldCell_t state);
 
 LifeWorldCell_t SetWorldState(LifeWorldBuffer_t *world, LifeWorldCell_t state);
 void ClearWorldBuffer(LifeWorldBuffer_t *world, LifeWorldCell_t state);

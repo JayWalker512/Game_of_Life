@@ -24,7 +24,7 @@ upper-left 8x8 quadrant. */
 int MarkDirtyRegion(DirtyRegionBuffer_t *buffer, const int x, const int y);
 
 //clears region values to 0
-void ClearDirtyRegions(DirtyRegionBuffer_t *buffer);
+void ClearDirtyRegionBuffer(DirtyRegionBuffer_t *buffer, int state);
 
 //returns the number of regions from the subdivided source area
 int NumRegions(DirtyRegionBuffer_t *buffer);
