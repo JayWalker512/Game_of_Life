@@ -18,6 +18,7 @@ typedef struct LifeArgOptions_s {
   LifeWorldDim_t worldHeight;
   int resX;
   int resY;
+  int regionSize;
   char bFullScreen;
   char bBenchmarking;
   char lifeFile[MAX_FILENAME_LENGTH];
@@ -46,7 +47,7 @@ int main(int argc, char **argv)
 
   ThreadedLifeContext_t *worldContext = 
     CreateThreadedLifeContext(options.worldWidth, options.worldHeight,
-    8, 0, 1, options.lifeFile); //default block size of 8 for now
+    options.regionSize, 0, 1, options.lifeFile); //default block size of 8 for now
   if (worldContext == NULL)
   {
     printf("Failed to ThreadedLifeContext_t!\n");
@@ -171,13 +172,14 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
   options->bBenchmarking = 0;
   options->worldWidth = 400;
   options->worldHeight = 300;
+  options->regionSize = 4; //4 seems to be the fastest. Minimum is 2, 1 breaks sim.
   options->resX = 1024;
   options->resY = 768;
   options->lifeFile[0] = '\0';
   char *cvalue = NULL;
 
   int c;
-  while ((c = getopt(argc, argv, "l:x:y:w:h:fb")) != -1 )
+  while ((c = getopt(argc, argv, "l:x:y:w:h:r:fb")) != -1 )
   {
     switch (c)
     {
@@ -202,6 +204,10 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
       case 'h':
         cvalue = optarg;
         options->worldHeight = atoi(cvalue);
+        break;
+      case 'r':
+        cvalue = optarg;
+        options->regionSize = atoi(cvalue);
         break;
       case 'l':
         if (strlen(optarg) <= MAX_FILENAME_LENGTH)
