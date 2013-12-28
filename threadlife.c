@@ -7,6 +7,7 @@
 #include "loadfile.h"
 #include <SDL2/SDL.h>
 
+#if 0
 void ThreadLifeMain(void *worldContext)
 {
 	ThreadedLifeContext_t *context = worldContext;
@@ -44,6 +45,43 @@ void ThreadLifeMain(void *worldContext)
     while (!context->bSimulating);
 
 	}
+}
+#endif
+
+void ThreadLifeMain(void *worldContext)
+{
+  ThreadedLifeContext_t *context = worldContext;
+
+  //IntStack_t *copyBlockQueue = NewIntStack(NumRegions(context->frontRegions));
+  //IntStack_t *simBlockQueue = NewIntStack(NumRegions(context->frontRegions));
+
+  unsigned long generations = 0;
+  while (context->bRunning)
+  {
+    /*Might need to implement a stack interface here. Would be less efficient
+    with more threads accessing concurrently? Could at least be used to build 
+    individual stacks for each thread. */
+
+    /*Analyzes block states in frontRegions and adds to relevant stacks based on
+    block states. This might be more sensical to divide into two functions, but 
+    would be slower. Why do in two passes what we can in one? */
+    /* These queues SHOULD be empty when we get back here, removing need to clear
+    them. Perhaps there should be more error checking/robustness involved.*/
+    /*BuildCopyAndSimBlockQueues(copyBlockQueue, simBlockQueue, context->frontRegions);*/
+
+    /* Copies blocks in front to back based on copyBlockQueue */
+    /*CopyBlocksFromQueue(context->back, context->front, 
+        context->frontRegions, copyBlockQueue);*/
+    
+    /*SimBlocksFromQueue(context->back, context->backRegions, 
+        context->front, context->frontRegions, simBlockQueue);*/
+
+    //renamed version of SwapThreadedLifeContextPointers()
+    /*SwapThreadedLifeContextWorldBufferPointers(context);
+    SwapThreadedLifeContextDirtyRegionPointers(context);*/
+
+    //generations = DoGensPerSec(generations);
+  }
 }
 
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
