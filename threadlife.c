@@ -149,47 +149,6 @@ static void SimWorldBlocksFromQueue(LifeWorldBuffer_t *back, DirtyRegionBuffer_t
 
 /* PUBLIC FUNCTIONS BEGIN HERE */
 
-#if 0
-void ThreadLifeMain(void *worldContext)
-{
-	ThreadedLifeContext_t *context = worldContext;
-
-	unsigned long generations = 0;
-	while (context->bRunning)
-	{
-    LifeGeneration(context->back, context->front);
-    SwapThreadedLifeContextPointers(context);
-    generations = DoGensPerSec(generations);
-
-    /* Should these be atomic check/changes? If two threads see a randomize/reload request
-    and one locks, the other will wait to lock until the other finishes and then repeat
-    the same operation. Fine with one thread, not with more. */
-    if (context->bRandomize)
-    {
-    	SDL_LockMutex(context->lock);
-    	context->bRandomize = 0;
-    	RandomizeWorldStateBinary(context);
-    	SDL_UnlockMutex(context->lock);
-    }
-
-    if (context->bReloadFile)
-    {
-      SDL_LockMutex(context->lock);
-      context->bReloadFile = 0;
-      ClearWorldBuffer(context->front, 0);
-      LoadLifeWorld(context->front, context->lifeFile, 1);
-      SDL_UnlockMutex(context->lock);
-    }
-
-    /*Quick an dirty way to pause simulation. 
-    Maybe there's a better way with semaphores or something that won't peg
-    all the cores while doing nothing?*/
-    while (!context->bSimulating);
-
-	}
-}
-#endif
-
 void ThreadLifeMain(void *worldContext)
 {
   ThreadedLifeContext_t *context = worldContext;
@@ -226,8 +185,34 @@ void ThreadLifeMain(void *worldContext)
     //renamed version of SwapThreadedLifeContextPointers()
     SwapThreadedLifeContextWorldBufferPointers(context); //locks are MAD slow
     SwapThreadedLifeContextDirtyRegionPointers(context);
-
     generations = DoGensPerSec(generations);
+
+    /*Quick an dirty way to pause simulation. 
+    Maybe there's a better way with semaphores or something that won't peg
+    all the cores while doing nothing?*/
+    while (!context->bSimulating);
+
+    /* Should these be atomic check/changes? If two threads see a randomize/reload request
+    and one locks, the other will wait to lock until the other finishes and then repeat
+    the same operation. Fine with one thread, not with more. */
+    if (context->bRandomize)
+    {
+      SDL_LockMutex(context->lock);
+      context->bRandomize = 0;
+      RandomizeWorldStateBinary(context); //this isn't a very good func name/setup...
+      ClearDirtyRegionBuffer(context->frontRegions, 1);
+      SDL_UnlockMutex(context->lock);
+    }
+
+    if (context->bReloadFile)
+    {
+      SDL_LockMutex(context->lock);
+      context->bReloadFile = 0;
+      ClearWorldBuffer(context->front, 0);
+      LoadLifeWorld(context->front, context->lifeFile, 1);
+      ClearDirtyRegionBuffer(context->frontRegions, 1);
+      SDL_UnlockMutex(context->lock);
+    }
   }
 
   DestroyStack(&copyBlockQueue);
