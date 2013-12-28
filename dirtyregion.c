@@ -27,8 +27,6 @@ static int GetRegionFromCoords(DirtyRegionBuffer_t *buffer, const int x, const i
 	int widthInRegions = buffer->srcWidth / buffer->regionSquareDims;
 	int heightInRegions = buffer->srcHeight / buffer->regionSquareDims;
 
-	//int xRegion = (int)floor((float)wrappedX / (float)buffer->regionSquareDims);
-	//int yRegion = (int)floor((float)wrappedY / (float)buffer->regionSquareDims);
 	int xRegion = wrappedX / buffer->regionSquareDims;
 	int yRegion = wrappedY / buffer->regionSquareDims; //solid!
 	return (yRegion * widthInRegions) + xRegion;
@@ -44,7 +42,7 @@ int main()
 	GetRegionSourceDims(buf, region, &x, &y, &w, &h);
 	printf("Region ULeft src coords (%d,%d) at %dx%d with %d regions. \n",x,y,w,h,NumRegions(buf));
 
-	int inX = 15;
+	int inX = 17;
 	int inY = 7;
 	printf("Region from coords (%d,%d) is %d\n", inX, inY, GetRegionFromCoords(buf, inX, inY));
 	return 0;
