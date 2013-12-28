@@ -62,7 +62,7 @@ DirtyRegionBuffer_t *NewDirtyRegionBuffer(const int regionSquareDims, const int 
 	while (scaledSrcHeight % regionSquareDims != 0)
 		scaledSrcHeight++;
 
-	printf("Scaled sizes: %d, %d\n", scaledSrcWidth, scaledSrcHeight);
+	//printf("Scaled sizes: %d, %d\n", scaledSrcWidth, scaledSrcHeight);
 
 	int widthInRegions = scaledSrcWidth / regionSquareDims;
 	int heightInRegions = scaledSrcHeight / regionSquareDims;
@@ -83,9 +83,9 @@ void DestroyDirtyRegionBuffer(DirtyRegionBuffer_t *buffer)
 	buffer = NULL;
 }
 
-int MarkDirtyRegion(DirtyRegionBuffer_t *buffer, const int x, const int y)
+int MarkRegion(DirtyRegionBuffer_t *buffer, const int x, const int y, const int state)
 {
-	buffer->buffer[GetRegionFromCoords(buffer, x, y)] = 1;
+	buffer->buffer[GetRegionFromCoords(buffer, x, y)] = state;
 	return 1;
 }
 

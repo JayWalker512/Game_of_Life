@@ -21,7 +21,7 @@ void DestroyDirtyRegionBuffer(DirtyRegionBuffer_t *buffer);
 areas from a larger whole. A 16x16 map may have a DirtyRegionBuffer consisting of 4 regions, 
 each being 8x8 in size. To mark the upper-left region, we pass in any coordinate from the
 upper-left 8x8 quadrant. */  
-int MarkDirtyRegion(DirtyRegionBuffer_t *buffer, const int x, const int y);
+int MarkRegion(DirtyRegionBuffer_t *buffer, const int x, const int y, const int state);
 
 //clears region values to 0
 void ClearDirtyRegionBuffer(DirtyRegionBuffer_t *buffer, int state);

@@ -46,11 +46,98 @@ static int CopyWorldBlocksFromQueue(LifeWorldBuffer_t *front, LifeWorldBuffer_t 
     int y = 0;
     int dim = 0;
     GetRegionSourceDims(dirtyRegionsReference, region, &x, &y, &dim, &dim);
-    printf("Copying region %d at %d,%d being %d dimensions\n", region, x, y, dim);
+    //printf("Copying region %d at %d,%d being %d dimensions\n", region, x, y, dim);
     CopyWorldBlock(front, back, x, y, dim, dim);
     blocksCopied++;
   }
   return blocksCopied;
+}
+
+static void ClearWorldBlock(LifeWorldBuffer_t *world, LifeWorldDim_t x, LifeWorldDim_t y,
+  LifeWorldDim_t w, LifeWorldDim_t h, LifeWorldCell_t state)
+{
+  for (int iterY = y; iterY < y + h; iterY++)
+  {
+    for (int iterX = x; iterX < x + w; iterX++)
+    {
+      SetCellState(iterX, iterY, world, state);
+    }
+  }
+}
+
+static void MarkAffectedRegions(LifeWorldDim_t x, LifeWorldDim_t y, DirtyRegionBuffer_t *dirtyBuffer)
+{
+  MarkRegion(dirtyBuffer, x, y, 1);
+  MarkRegion(dirtyBuffer, x - 1, y - 1, 1); //upper left
+  MarkRegion(dirtyBuffer, x + 1, y - 1, 1); //upper right
+  MarkRegion(dirtyBuffer, x - 1, y + 1, 1); //lower left
+  MarkRegion(dirtyBuffer, x + 1, y + 1, 1); //lower right
+  /* Marking regions this way ensures that we mark any adjacent regions without
+  doing any special checks. */
+}
+
+static void SimWorldBlock(LifeWorldBuffer_t *back, DirtyRegionBuffer_t *backRegions,
+  LifeWorldBuffer_t *front,
+  LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldDim_t w, LifeWorldDim_t h)
+{
+  //If the block didn't change state at all during simulation, we copy it to the
+  //opposite buffer so it will remain static on each buffer flip.
+  char bBlockChangedState = 0;  
+
+  //Clear the block we're about to write our simulation result to.
+  //We don't really need to do this... right? The whole block of the back buffer should be written to.
+  ClearWorldBlock(back, x, y, w, h, 0);
+
+  LifeWorldDim_t iterX = 0;
+  LifeWorldDim_t iterY = 0;
+  for (iterY = y; iterY < y + h; iterY++)
+  {
+    for (iterX = x; iterX < x + w; iterX++)
+    {
+      int numNeighbors = NumLiveNeighbors(iterX, iterY, front);
+      int cellIsLiving = GetCellState(iterX, iterY, front);
+      if (cellIsLiving)
+      {
+        if (numNeighbors >= 2 && numNeighbors <= 3)
+        {
+          SetCellState(iterX, iterY, back, 1); //cell was alive, stays alive
+          //need not mark regions if nothing changed.
+        }
+        else if (numNeighbors < 2 || numNeighbors > 3)
+        {
+          SetCellState(iterX, iterY, back, 0);
+          MarkAffectedRegions(iterX, iterY, backRegions);
+          bBlockChangedState = 1;
+        }
+      }
+
+      if (!cellIsLiving && numNeighbors == 3) //dead cell becomes living
+      {
+        SetCellState(iterX, iterY, back, 1);
+        MarkAffectedRegions(iterX, iterY, backRegions);
+        bBlockChangedState = 1;
+      }
+    }
+  }
+
+  if (!bBlockChangedState)
+  {
+    CopyWorldBlock(back, front, x, y, w, h);
+  }
+}
+
+static void SimWorldBlocksFromQueue(LifeWorldBuffer_t *back, DirtyRegionBuffer_t *backRegions, 
+        LifeWorldBuffer_t *front, DirtyRegionBuffer_t *frontRegions, Stack_t *simBlockQueue)
+{
+  while (!StackIsEmpty(simBlockQueue))
+  {
+    int x = 0;
+    int y = 0;
+    int dim = 0;
+    int region = StackPop(simBlockQueue);
+    GetRegionSourceDims(frontRegions, region, &x, &y, &dim, &dim);
+    SimWorldBlock(back, backRegions, front, x, y, dim, dim);
+  }
 }
 
 /* PUBLIC FUNCTIONS BEGIN HERE */
@@ -119,15 +206,15 @@ void ThreadLifeMain(void *worldContext)
     them. Perhaps there should be more error checking/robustness involved.*/
     /* Do we even need to explicitly copy blocks that aren't being simulated? 
     Won't they be the same anyway? */
+    ClearDirtyRegionBuffer(context->backRegions, 0); //0 means copy, 1 means simulate
     BuildCopyAndSimBlockQueues(&copyBlockQueue, &simBlockQueue, context->frontRegions);
-    ClearDirtyRegionBuffer(context->backRegions, 0);
 
     /* Copies blocks in front to back based on copyBlockQueue */
-    CopyWorldBlocksFromQueue(context->back, context->front, 
-        context->frontRegions, &copyBlockQueue);
+    /*CopyWorldBlocksFromQueue(context->back, context->front, 
+        context->frontRegions, &copyBlockQueue);*/
     
-    /*SimWorldBlocksFromQueue(context->back, context->backRegions, 
-        context->front, context->frontRegions, &simBlockQueue);*/
+    SimWorldBlocksFromQueue(context->back, context->backRegions, 
+        context->front, context->frontRegions, &simBlockQueue);
 
     //renamed version of SwapThreadedLifeContextPointers()
     SwapThreadedLifeContextWorldBufferPointers(context); //locks are MAD slow
@@ -383,7 +470,6 @@ LifeWorldCell_t SetWorldState(LifeWorldBuffer_t *world, LifeWorldCell_t state)
       SetCellState(x, y, world, state);
     }
   }
-
   return state;
 }
 
