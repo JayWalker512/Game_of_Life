@@ -208,6 +208,8 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
       case 'r':
         cvalue = optarg;
         options->regionSize = atoi(cvalue);
+        if (options->regionSize < 2)
+          options->regionSize = 2;
         break;
       case 'l':
         if (strlen(optarg) <= MAX_FILENAME_LENGTH)
