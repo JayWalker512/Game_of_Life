@@ -6,7 +6,7 @@ static float *AllocateQuadArray(const int numQuads); //used in NewQuadDataBuffer
 static GLuint *AllocateIndexArray(const int numQuads); //used in NewQuadDataBuffer
 static GLuint CreateShader(GLenum eShaderType, const char *strShaderFile);
 static void WriteVec4(float *floatArr, float x, float y, float z, float w);
-static float RandFloat(float min, float max);
+//static float RandFloat(float min, float max);
 
 SDL_Window *InitSDL(int winWidth, int winHeight, const char *title, char bFull)
 {
@@ -195,7 +195,7 @@ QuadDrawData_t *NewQuadDataBuffer(const int numQuads)
 
 char SetQuadShader(QuadDrawData_t *qDrawData, GLuint shader)
 {
-	if (shader == -1)
+	if (shader == (unsigned int)-1)
 		return 0;
 
 	qDrawData->shader = shader;
@@ -305,10 +305,10 @@ void DrawQuadData(QuadDrawData_t *QuadBuffer, GLuint shader)
 }
 
 //Doesn't generate negatives correctly?
-float RandFloat(float min, float max)
+/*float RandFloat(float min, float max)
 {
 	return min + (float)rand()/((float)RAND_MAX/max);
-}
+}*/
 
 void ClearScreen(float r, float g, float b)
 {	

@@ -25,7 +25,7 @@ static int GetRegionFromCoords(DirtyRegionBuffer_t *buffer, const int x, const i
 		wrappedY += buffer->srcHeight;
 
 	int widthInRegions = buffer->srcWidth / buffer->regionSquareDims;
-	int heightInRegions = buffer->srcHeight / buffer->regionSquareDims;
+	//int heightInRegions = buffer->srcHeight / buffer->regionSquareDims;
 
 	int xRegion = wrappedX / buffer->regionSquareDims;
 	int yRegion = wrappedY / buffer->regionSquareDims; //solid!
