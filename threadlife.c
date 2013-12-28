@@ -183,8 +183,7 @@ void ThreadLifeMain(void *worldContext)
         context->front, context->frontRegions, &simBlockQueue);
 
     //renamed version of SwapThreadedLifeContextPointers()
-    SwapThreadedLifeContextWorldBufferPointers(context); //locks are MAD slow
-    SwapThreadedLifeContextDirtyRegionPointers(context);
+    SwapThreadedLifeContextGenerationPointers(context);
     generations = DoGensPerSec(generations);
 
     /*Quick an dirty way to pause simulation. 
@@ -322,16 +321,10 @@ void SwapDirtyRegionPointers(DirtyRegionBuffer_t **front, DirtyRegionBuffer_t **
   *back = temp;
 }
 
-void SwapThreadedLifeContextWorldBufferPointers(ThreadedLifeContext_t *worldContext)
+void SwapThreadedLifeContextGenerationPointers(ThreadedLifeContext_t *worldContext)
 {
   SDL_LockMutex(worldContext->lock);
   SwapWorldPointers(&worldContext->front, &worldContext->back);
-  SDL_UnlockMutex(worldContext->lock);
-}
-
-void SwapThreadedLifeContextDirtyRegionPointers(ThreadedLifeContext_t *worldContext)
-{
-  SDL_LockMutex(worldContext->lock);
   SwapDirtyRegionPointers(&worldContext->frontRegions, &worldContext->backRegions);
   SDL_UnlockMutex(worldContext->lock);
 }

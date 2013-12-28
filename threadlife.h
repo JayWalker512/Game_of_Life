@@ -32,10 +32,12 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
 void DestroyThreadedLifeContext(ThreadedLifeContext_t *context);
 LifeWorldBuffer_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height);
 void DestroyLifeWorld(LifeWorldBuffer_t *world);
+
 void SwapWorldPointers(LifeWorldBuffer_t **front, LifeWorldBuffer_t **back); //can be static
 void SwapDirtyRegionPointers(DirtyRegionBuffer_t **front, DirtyRegionBuffer_t **back);
-void SwapThreadedLifeContextWorldBufferPointers(ThreadedLifeContext_t *worldContext);
-void SwapThreadedLifeContextDirtyRegionPointers(ThreadedLifeContext_t *worldContext);
+//combines the above two functions in to one so we only need to lock once.
+void SwapThreadedLifeContextGenerationPointers(ThreadedLifeContext_t *worldContext);
+
 void CopyWorld(LifeWorldBuffer_t *dest, LifeWorldBuffer_t * const source);
 
 LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world);
