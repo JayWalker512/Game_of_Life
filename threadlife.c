@@ -86,7 +86,7 @@ static void SimWorldBlock(LifeWorldBuffer_t *back, DirtyRegionBuffer_t *backRegi
 
   //Clear the block we're about to write our simulation result to.
   //We don't really need to do this... right? The whole block of the back buffer should be written to.
-  ClearWorldBlock(back, x, y, w, h, 0);
+  //ClearWorldBlock(back, x, y, w, h, 0);
 
   LifeWorldDim_t iterX = 0;
   LifeWorldDim_t iterY = 0;
@@ -116,6 +116,13 @@ static void SimWorldBlock(LifeWorldBuffer_t *back, DirtyRegionBuffer_t *backRegi
         SetCellState(iterX, iterY, back, 1);
         MarkAffectedRegions(iterX, iterY, backRegions);
         bBlockChangedState = 1;
+      }
+      else if (!cellIsLiving && numNeighbors != 3)
+      {
+        SetCellState(iterX, iterY, back, 0); 
+        /* Cell stays dead. We must make sure we write to every cell in the new
+        buffer whether it changes or not, to overwrite the previous state it contained.
+        This is to avoid having to clear each destination block prior to simulation. */
       }
     }
   }
