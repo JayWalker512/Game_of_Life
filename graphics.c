@@ -276,7 +276,7 @@ void WriteVec4(float *floatArr, float x, float y, float z, float w)
 	*(floatArr+3) = w; 
 }
 	
-void DrawQuadData(QuadDrawData_t *QuadBuffer, GLuint shader)
+void DrawQuadData(QuadDrawData_t *QuadBuffer)
 {
 	/* drawing code in here! */
 	glBindVertexArray(QuadBuffer->vao);
@@ -291,11 +291,11 @@ void DrawQuadData(QuadDrawData_t *QuadBuffer, GLuint shader)
 		QuadBuffer->vertexArraySize, 
 		QuadBuffer->vertexArray, 
 		GL_STREAM_DRAW); //formatting the data for the buffer, sending it to the buffer
-	 
+	
 	glEnableVertexAttribArray(0); //0 is our index, refer to "location = 0" in the vertex shader
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0); //tell gl (shader!) how to interpret our
 	
-	glUseProgram(shader);
+	glUseProgram(QuadBuffer->shader);
 	glDrawElements(GL_TRIANGLES, QuadBuffer->numIndices, GL_UNSIGNED_INT, QuadBuffer->indexArray); 
 	glUseProgram(0);
 	

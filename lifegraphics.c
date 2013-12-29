@@ -86,8 +86,7 @@ void DrawWorld(SDL_Window *window, LifeGraphicsContext_t *graphicsContext)
     }
   }
 
-  DrawQuadData(graphicsContext->pQuadDrawData, 
-    graphicsContext->pQuadDrawData->shader);
+  DrawQuadData(graphicsContext->pQuadDrawData);
   ClearQuadDrawData(graphicsContext->pQuadDrawData);
   SDL_GL_SwapWindow(window);
 }

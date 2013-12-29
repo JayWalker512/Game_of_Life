@@ -4,6 +4,8 @@
 #include "graphics.h"
 #include "threadlife.h"
 
+/* Pretty much written for drawing large grids of quads, based on the
+contents of pWorldRenderBuffer */
 typedef struct LifeGraphicsContext_s {
 	LifeWorldBuffer_t *pWorldRenderBuffer;
 	QuadDrawData_t *pQuadDrawData;
