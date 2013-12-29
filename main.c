@@ -54,6 +54,11 @@ int main(int argc, char **argv)
     return 1;
   }
 
+  /* TODO: Perhaps this graphics context doesn't need to be created here?
+  SyncWorldToScreen already has the information required to generate this. 
+  Maybe we just need an "InitLifeGraphics" function to set things up for game
+  specific drawing? Or maybe SyncWorldToScreen can allocate and maintain state
+  for things as needed. */
   LifeGraphicsContext_t *graphicsContext = 
     CreateLifeGraphicsContext(worldContext->front->width, worldContext->front->height);
   if (graphicsContext == NULL)
