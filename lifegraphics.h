@@ -9,6 +9,18 @@ contents of pWorldRenderBuffer */
 /*Do we even need these? Certainly not publicly necessary, rendering subsystem
 should take care of all the low level stuff. This is unnecessarily
 exposed and inflexible. */
+
+/* as outline in my todo from 12/30/13
+typedef struct LifeGameGraphicsContext_s {
+	QuadDrawData_t *pCellDrawData;
+	QuadDrawData_t *pRegionDrawData;
+	vec3_t scale;
+	vec3_t translation;
+} LifeGameGraphicsContext_t;
+
+//functions for modifying this context:
+*/
+
 typedef struct LifeGraphicsContext_s {
 	LifeWorldBuffer_t *pWorldRenderBuffer;
 	QuadDrawData_t *pQuadDrawData;
