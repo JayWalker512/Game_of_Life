@@ -34,28 +34,23 @@ void DestroyLifeGraphicsContext(LifeGraphicsContext_t *context)
 
 void SyncWorldToScreen(SDL_Window *window, ThreadedLifeContext_t *worldContext, LifeGraphicsContext_t *graphicsContext, int syncRateHz)
 {
-  //fair amount of duplicated code here, can be cleaned up?
   static unsigned long endTime = 0;
-  if (syncRateHz <= 0)
+  if (SDL_GetTicks() > endTime)
   {
+		//Critical section!
     SDL_LockMutex(worldContext->lock);
     CopyWorld(graphicsContext->pWorldRenderBuffer, worldContext->front);
     SDL_UnlockMutex(worldContext->lock);
-
     DrawWorld(window, graphicsContext);
+		//end crititcal section!
+
+		if (syncRateHz > 0)
+		{
+    	unsigned long delayMs = 1000 / syncRateHz;
+    	endTime = SDL_GetTicks() + delayMs;
+		}
   }
-  else if (SDL_GetTicks() > endTime)
-  {
 
-    SDL_LockMutex(worldContext->lock);
-    CopyWorld(graphicsContext->pWorldRenderBuffer, worldContext->front);
-    SDL_UnlockMutex(worldContext->lock);
-
-    DrawWorld(window, graphicsContext);
-
-    unsigned long delayMs = 1000 / syncRateHz;
-    endTime = SDL_GetTicks() + delayMs;
-  }
 }
 
 void DrawWorld(SDL_Window *window, LifeGraphicsContext_t *graphicsContext)
