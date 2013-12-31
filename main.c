@@ -59,8 +59,8 @@ int main(int argc, char **argv)
   Maybe we just need an "InitLifeGraphics" function to set things up for game
   specific drawing? Or maybe SyncWorldToScreen can allocate and maintain state
   for things as needed. */
-  LifeGraphicsContext_t *graphicsContext = 
-    CreateLifeGraphicsContext(worldContext->front->width, worldContext->front->height);
+  LifeGameGraphicsContext_t *graphicsContext = 
+    CreateLifeGameGraphicsContext(worldContext);
   if (graphicsContext == NULL)
   {
     printf("Failed to create LifeGraphicsContext_t!\n");
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
   //cleaning up
   SDL_WaitThread(lifeThread, NULL);
   DestroyThreadedLifeContext(worldContext);
-  DestroyLifeGraphicsContext(graphicsContext);
+  DestroyLifeGameGraphicsContext(graphicsContext);
   SDL_GL_DeleteContext(glContext);
   SDL_DestroyWindow(window);
   SDL_Quit();
