@@ -13,9 +13,6 @@ LifeGraphicsContext_t *CreateLifeGraphicsContext(LifeWorldDim_t w, LifeWorldDim_
 
   context->pWorldRenderBuffer = NewLifeWorld(w, h);
 
-  /*drawing related data could be referred to with an int that is mapped internally
-  in the graphics code, like how gl does things. Don't give access to raw low-level
-  data, just let high-level code refer to it in a high-level way.*/
   context->pQuadDrawData = NewQuadDataBuffer(w * h);
   if (!SetQuadShader(context->pQuadDrawData, 
     BuildShaderProgram("shaders/vs1.glsl", "shaders/fs1.glsl"))) //default shaders
