@@ -1,5 +1,6 @@
 #include "vector3.h"
 #include <stdlib.h>
+#include <math.h>
 
 Vector3_t *NewVector3(float x, float y, float z)
 {
@@ -23,7 +24,10 @@ void Vector3Set(Vector3_t *out, float x, float y, float z)
 
 void Vector3Normalize(Vector3_t *out, Vector3_t *const in)
 {
-	//How do I normalize a vector again?
+	float magnitude = sqrt((in->x * in->x) + (in->y * in->y) + (in->z * in->z));
+	out->x = in->x / magnitude;
+	out->y = in->y / magnitude;
+	out->z = in->z / magnitude;
 }
 
 void Vector3Add(Vector3_t *out, Vector3_t *const term1, Vector3_t *const term2)

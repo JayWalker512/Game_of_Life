@@ -1,7 +1,7 @@
 //Game of Life
 //Brandon Foltz
 //use this line to compile me:
-//gcc main.c threadlife.c graphics.c lifegraphics.c loadfile.c dirtyregion.c stack.c -o gameoflife -std=c99 -Wall -Wextra -pedantic -g -D_GNU_SOURCE -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm
+//gcc main.c threadlife.c graphics.c lifegraphics.c loadfile.c dirtyregion.c stack.c vector3.c -o gameoflife -std=c99 -Wall -Wextra -pedantic -g -D_GNU_SOURCE -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
