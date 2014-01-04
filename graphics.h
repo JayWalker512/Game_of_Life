@@ -5,28 +5,13 @@
 #include <SDL2/SDL.h>
 #include "vector3.h"
 
-/* Is it possible to make this an "opaque" type by forward declaring it and just
-using functions to modify? */
-typedef struct QuadDrawData_s {
-	float *vertexArray;
-	GLuint *indexArray;
-	int vertexArraySize;
-	int indexArraySize;
-	int numVerts;
-	int numIndices;
-	GLuint vao;
-	GLuint vbo;
-	GLuint shader;
-	Vector3_t scale;
-	Vector3_t translation;
-	Vector3_t rgb;
-} QuadDrawData_t; //don't modify this struct by hand! Only in functions!
+//go go gadget data hiding!
+typedef struct QuadDrawData_s QuadDrawData_t;
 
 //new funcs:
 void SetQuadTranslation(QuadDrawData_t *dest, Vector3_t *const translation);
 void SetQuadScale(QuadDrawData_t *dest, Vector3_t *const scale);
 void SetQuadColor(QuadDrawData_t *dest, Vector3_t *const rgb);
-
 
 SDL_Window *InitSDL(int winWidth, int winHeight, const char *title, char bFull);
 SDL_GLContext InitSDL_GL(SDL_Window *window);
