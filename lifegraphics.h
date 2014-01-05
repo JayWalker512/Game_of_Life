@@ -27,13 +27,8 @@ void SetRegionDrawColor(LifeGameGraphicsContext_t *context, Vector3_t *const rgb
 void DrawRegionsEnabled(LifeGameGraphicsContext_t *context, int enabled);
 /* static to-be*/ void DrawGame(SDL_Window *window, LifeGameGraphicsContext_t *context);
 
-/* OR maybe the shader params
-should be maintained in the qdd struct and handled at a lower level in graphics.c. 
-That's probably better. Just with like a "SetQuadParams()"" func or something. */
 void DrawWorld(SDL_Window *window, LifeGameGraphicsContext_t *graphicsContext);
 
-/* This can do without the graphicsContext. It should remain public though as a
-"do all the drawing" type call. All relevant information is in worldContext */
 void SyncWorldToScreen(SDL_Window *window, 
 	ThreadedLifeContext_t *worldContext, 
 	LifeGameGraphicsContext_t *graphicsContext,

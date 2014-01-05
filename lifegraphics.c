@@ -43,7 +43,7 @@ void DestroyLifeGameGraphicsContext(LifeGameGraphicsContext_t *context)
 
 void GetGameGraphicsTranslation(Vector3_t *translation, LifeGameGraphicsContext_t *const context)
 {
-  Vector3Set(translation, context->scale.x, context->scale.y, context->scale.z);
+  Vector3Set(translation, context->translation.x, context->translation.y, context->translation.z);
 }
 
 void SetGameGraphicsTranslation(LifeGameGraphicsContext_t *context, Vector3_t *const translation)
@@ -103,16 +103,6 @@ void SyncWorldToScreen(SDL_Window *window, ThreadedLifeContext_t *worldContext, 
     CopyWorld(graphicsContext->pWorldRenderBuffer, worldContext->front);
     SDL_UnlockMutex(worldContext->lock);
 		//end crititcal section!
-
-    //test code:
-    Vector3_t scaleModifier; 
-    Vector3Set(&scaleModifier, 0.01, 0.01, 0.0);
-    Vector3_t currentScale;
-    GetGameGraphicsScale(&currentScale, graphicsContext);
-    Vector3_t newScale;
-    Vector3Add(&newScale, &currentScale, &scaleModifier);
-    SetGameGraphicsScale(graphicsContext, &newScale);
-
 
     DrawWorld(window, graphicsContext);
 

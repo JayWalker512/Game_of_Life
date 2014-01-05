@@ -9,7 +9,7 @@ void main()
 	vec4 flippedYandScaled = vec4(2.0, -2.0, 1.0, 1.0);
 	vec4 uLeftTranslation = vec4(-1.0, 1.0, 0, 0);
 	vec4 initialTranslation = (position * flippedYandScaled) + uLeftTranslation;
-	gl_Position = (initialTranslation * scale) + translation;
+	gl_Position = (initialTranslation + translation) * scale;
 	fragColor = rgb; 
 	//0 alpha does nothing? need enabled?
 }

@@ -11,6 +11,7 @@
 #include "threadlife.h"
 #include "lifegraphics.h"
 #include "loadfile.h"
+#include "vector3.h"
 #include <SDL2/SDL.h>
 
 typedef struct LifeArgOptions_s {
@@ -24,16 +25,24 @@ typedef struct LifeArgOptions_s {
   char lifeFile[MAX_FILENAME_LENGTH];
 } LifeArgOptions_t;
 
-typedef struct KeyPresses_s {
+typedef struct InputDeviceValues_s {
   char bEsc;
   char bSpace;
   char bR;
   char bZ;
-} KeyPresses_t;
 
-static void InitializeKeyPresses(KeyPresses_t *keys);
-static char CheckInput(KeyPresses_t *keys);
-static char HandleInput(ThreadedLifeContext_t *context, KeyPresses_t * const keys);
+  //mouse
+  char bLeftClick;
+  int scrollVal;
+  int mouseMotionX;
+  int mouseMotionY;
+} InputDeviceValues_t;
+
+static void InitializeKeyPresses(InputDeviceValues_t *keys);
+static char CheckInput(InputDeviceValues_t *keys);
+static char HandleInput(ThreadedLifeContext_t *worldContext, 
+  LifeGameGraphicsContext_t *graphicsContext, 
+  InputDeviceValues_t * const keys);
 static char ParseArgs(LifeArgOptions_t *options, int argc, char **argv);
 
 int main(int argc, char **argv)
@@ -54,11 +63,6 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  /* TODO: Perhaps this graphics context doesn't need to be created here?
-  SyncWorldToScreen already has the information required to generate this. 
-  Maybe we just need an "InitLifeGraphics" function to set things up for game
-  specific drawing? Or maybe SyncWorldToScreen can allocate and maintain state
-  for things as needed. */
   LifeGameGraphicsContext_t *graphicsContext = 
     CreateLifeGameGraphicsContext(worldContext);
   if (graphicsContext == NULL)
@@ -83,10 +87,10 @@ int main(int argc, char **argv)
     SyncWorldToScreen(window, worldContext, graphicsContext, 60);
 
     //input handling
-    KeyPresses_t keys;
+    InputDeviceValues_t keys;
     InitializeKeyPresses(&keys);
     CheckInput(&keys);
-    HandleInput(worldContext, &keys);
+    HandleInput(worldContext, graphicsContext, &keys);
   }
 
   //cleaning up
@@ -100,15 +104,20 @@ int main(int argc, char **argv)
   return 0;
 }
 
-void InitializeKeyPresses(KeyPresses_t *keys)
+void InitializeKeyPresses(InputDeviceValues_t *keys)
 {
   keys->bSpace = 0;
   keys->bEsc = 0;
   keys->bR = 0;
   keys->bZ = 0;
+
+  keys->bLeftClick = 0;
+  keys->scrollVal = 0;
+  keys->mouseMotionX = 0;
+  keys->mouseMotionY = 0;
 }
 
-char CheckInput(KeyPresses_t *keys)
+char CheckInput(InputDeviceValues_t *keys)
 {
   SDL_Event event;
   if (SDL_PollEvent(&event))
@@ -132,41 +141,109 @@ char CheckInput(KeyPresses_t *keys)
       if (event.key.keysym.sym == SDLK_z)
         keys->bZ = 1;
     }
+
+    /* UGGGH this is so hackish. */
+    /*if (event.type == SDL_MOUSEBUTTONDOWN)
+    {
+      printf("Pressed button: %d\n", event.button.button);
+      if (event.button.button == SDL_BUTTON_LEFT)
+        keys->bLeftClick = 1;
+    }
+
+    if (event.type == SDL_MOUSEBUTTONUP)
+    {
+      printf("Released button: %d\n", event.button.button);
+      if (event.button.button == SDL_BUTTON_LEFT)
+        keys->bLeftClick = 0;
+    }*/
+    if (SDL_GetMouseState(NULL,NULL)&SDL_BUTTON_LEFT)
+      keys->bLeftClick = 1;
+    else
+      keys->bLeftClick = 0;
+
+    if (event.type == SDL_MOUSEWHEEL)
+    {
+      keys->scrollVal = event.wheel.y;
+      //sprintf("Scrollval: %d\n", event.wheel.y);
+    }
+
+    if (event.type == SDL_MOUSEMOTION)
+    {
+      keys->mouseMotionX = event.motion.xrel;
+      keys->mouseMotionY = event.motion.yrel;
+      //printf("x,y motion: %d,%d\n", event.motion.xrel, event.motion.yrel);
+    }
   }
 
   return 1;
 }
 
-static char HandleInput(ThreadedLifeContext_t *context, KeyPresses_t * const keys)
+static char HandleInput(ThreadedLifeContext_t *worldContext,
+  LifeGameGraphicsContext_t *graphicsContext,
+  InputDeviceValues_t * const keys)
 {
   if (keys->bZ)
   {
-    SDL_LockMutex(context->lock);
-    context->bRandomize = 1;
-    SDL_UnlockMutex(context->lock);
+    SDL_LockMutex(worldContext->lock);
+    worldContext->bRandomize = 1;
+    SDL_UnlockMutex(worldContext->lock);
   }
+
   if (keys->bR)
   {
     //reload the file
-    SDL_LockMutex(context->lock);
-    context->bReloadFile = 1;
-    SDL_UnlockMutex(context->lock);
+    SDL_LockMutex(worldContext->lock);
+    worldContext->bReloadFile = 1;
+    SDL_UnlockMutex(worldContext->lock);
   }
+
   if (keys->bSpace)
   {
     //pause the simulation or unpause it.
-    if (context->bSimulating)
-      context->bSimulating = 0;
+    if (worldContext->bSimulating)
+      worldContext->bSimulating = 0;
     else
-      context->bSimulating = 1;
+      worldContext->bSimulating = 1;
   }
+
   if (keys->bEsc)
   {
     //we have to unlock the threads by setting bSimulating to 1 otherwise
     //they will hang when we try to quit.
-    context->bSimulating = 1;
-    context->bRunning = 0;
+    worldContext->bSimulating = 1;
+    worldContext->bRunning = 0;
   }
+
+  if (keys->scrollVal != 0)
+  {
+    //zoom by scroll wheel
+    Vector3_t scaleModifier; 
+    Vector3Set(&scaleModifier, 
+      (float)keys->scrollVal * 0.075, 
+      (float)keys->scrollVal * 0.075, 
+      0.0);
+    Vector3_t currentScale;
+    GetGameGraphicsScale(&currentScale, graphicsContext);
+    Vector3_t newScale;
+    Vector3Add(&newScale, &currentScale, &scaleModifier);
+    SetGameGraphicsScale(graphicsContext, &newScale);
+  }
+
+  if (keys->bLeftClick)
+  {
+    printf("Translating: %d,%d\n", keys->mouseMotionX, keys->mouseMotionY);
+    Vector3_t translationModifier;
+    Vector3Set(&translationModifier,
+      (float)keys->mouseMotionX * 0.00075,
+      (float)keys->mouseMotionY * -0.00075, //flipped Y axis, remember?
+      0.0);
+    Vector3_t currentTranslation;
+    GetGameGraphicsTranslation(&currentTranslation, graphicsContext);
+    Vector3_t newTranslation;
+    Vector3Add(&newTranslation, &currentTranslation, &translationModifier);
+    SetGameGraphicsTranslation(graphicsContext, &newTranslation);
+  }
+
   return 1;
 }
 
