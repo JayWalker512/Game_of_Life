@@ -12,6 +12,9 @@ typedef struct QuadDrawData_s {
 	GLuint vao;
 	GLuint vbo;
 	GLuint shader;
+	GLint scaleLoc;
+	GLint translationLoc;
+	GLint rgbLoc;
 	Vector3_t scale;
 	Vector3_t translation;
 	Vector3_t rgb;
@@ -181,7 +184,7 @@ GLuint CreateShader(GLenum eShaderType, const char *strShaderFile)
 			case GL_FRAGMENT_SHADER: sprintf(strShaderType, "fragment"); break;
 		}
 
-		//printf("Compile failure in %s shader:\n%s\n", strShaderType, strInfoLog);
+		printf("Compile failure in %s shader:\n%s\n", strShaderType, strInfoLog);
 		return -1;
 	}
 	//else
@@ -200,7 +203,27 @@ QuadDrawData_t *NewQuadDataBuffer(const int numQuads)
 	qDrawData->numVerts = 0;
 	qDrawData->numIndices = 0;
 	qDrawData->shader = -1;
+
+	if (!SetQuadShader(qDrawData, 
+    BuildShaderProgram("shaders/vs1.glsl", "shaders/fs1.glsl"))) //default shaders
+  {
+    printf("Couldn't build quad shader(s)!\n");
+    return NULL;
+  }
 	
+	qDrawData->scaleLoc = glGetUniformLocation(qDrawData->shader, "scale");
+	qDrawData->translationLoc = glGetUniformLocation(qDrawData->shader, "translation");
+	qDrawData->rgbLoc = glGetUniformLocation(qDrawData->shader, "rgb");
+	/*
+	printf("Shader: %d\n", qDrawData->shader);
+	printf("scaleLoc: %d\n", qDrawData->scaleLoc);
+	printf("translationLoc: %d\n", qDrawData->translationLoc);
+	printf("rgbLoc: %d\n", qDrawData->rgbLoc);
+	*/
+	Vector3Set(&qDrawData->scale, 1.0, 1.0, 1.0);
+	Vector3Set(&qDrawData->translation, 0.0, 0.0, 0.0);
+	Vector3Set(&qDrawData->rgb, 1.0, 0.0, 0.0); //default to red
+
 	//set up OpenGL stuff
 	glGenVertexArrays(1, &qDrawData->vao);
 	glGenBuffers(1, &qDrawData->vbo); //create the buffer
@@ -222,6 +245,7 @@ void DestroyQuadDrawData(QuadDrawData_t *qDrawData)
 	glDeleteProgram(qDrawData->shader);
 	glDeleteBuffers(1, &qDrawData->vbo);
 	glDeleteVertexArrays(1, &qDrawData->vao);
+	glDeleteProgram(qDrawData->shader);
 
 	free(qDrawData->vertexArray);
 	free(qDrawData->indexArray);
@@ -311,6 +335,14 @@ void DrawQuadData(QuadDrawData_t *QuadBuffer)
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0); //tell gl (shader!) how to interpret our
 	
 	glUseProgram(QuadBuffer->shader);
+
+	glUniform4f(QuadBuffer->scaleLoc, 
+		QuadBuffer->scale.x, QuadBuffer->scale.y, QuadBuffer->scale.z, 1.0f);
+	glUniform4f(QuadBuffer->translationLoc,
+		QuadBuffer->translation.x, QuadBuffer->translation.y, QuadBuffer->translation.z, 0.0f);
+	glUniform4f(QuadBuffer->rgbLoc,
+		QuadBuffer->rgb.x, QuadBuffer->rgb.y, QuadBuffer->rgb.z, 1.0f);
+
 	glDrawElements(GL_TRIANGLES, QuadBuffer->numIndices, GL_UNSIGNED_INT, QuadBuffer->indexArray); 
 	glUseProgram(0);
 	

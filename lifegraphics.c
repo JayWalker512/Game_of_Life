@@ -26,22 +26,6 @@ LifeGameGraphicsContext_t *CreateLifeGameGraphicsContext(ThreadedLifeContext_t *
   Vector3Set(&graphicsContext->translation, 0.0, 0.0, 0.0);
   char bDrawRegions = 0;
 
-  if (!SetQuadShader(graphicsContext->pCellDrawData, 
-    BuildShaderProgram("shaders/vs1.glsl", "shaders/fs1.glsl"))) //default shaders
-  {
-    printf("Couldn't build quad shader(s)!\n");
-    DestroyLifeGameGraphicsContext(graphicsContext);
-    return NULL;
-  }
-
-  if (!SetQuadShader(graphicsContext->pRegionDrawData, 
-    BuildShaderProgram("shaders/vs1.glsl", "shaders/fs1.glsl"))) //default shaders
-  {
-    printf("Couldn't build quad shader(s)!\n");
-    DestroyLifeGameGraphicsContext(graphicsContext);
-    return NULL;
-  }
-
   return graphicsContext;
 
   /* TODO: maybe have some kind of shader-manager so that we don't need to build the
