@@ -231,7 +231,7 @@ static char HandleInput(ThreadedLifeContext_t *worldContext,
 
   if (keys->bLeftClick)
   {
-    printf("Translating: %d,%d\n", keys->mouseMotionX, keys->mouseMotionY);
+    //printf("Translating: %d,%d\n", keys->mouseMotionX, keys->mouseMotionY);
     Vector3_t translationModifier;
     Vector3Set(&translationModifier,
       (float)keys->mouseMotionX * 0.00075,

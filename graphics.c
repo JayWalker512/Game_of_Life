@@ -84,12 +84,14 @@ SDL_GLContext InitSDL_GL(SDL_Window *window)
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
+  /*
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_FRONT);
   glDepthMask(GL_TRUE);
   glDepthFunc(GL_LEQUAL);
   glDepthRange(0.0f, 1.0f);
-
+	*/
   int w, h;
   SDL_GetWindowSize(window, &w, &h);
   glViewport(0, 0, w, h);

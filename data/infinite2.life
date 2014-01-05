@@ -1,0 +1,7 @@
+!infinite growth pattern 2 from http://en.wikipedia.org/wiki/Conway's_Game_of_Life
+!block laying switch engine
+.OOO.O.
+.O.....
+....OO.
+..OO.O.
+.O.O.O.
