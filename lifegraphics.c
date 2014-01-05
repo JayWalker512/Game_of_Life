@@ -41,6 +41,58 @@ void DestroyLifeGameGraphicsContext(LifeGameGraphicsContext_t *context)
   free(context);
 }
 
+void GetGameGraphicsTranslation(Vector3_t *translation, LifeGameGraphicsContext_t *const context)
+{
+  Vector3Set(translation, context->scale.x, context->scale.y, context->scale.z);
+}
+
+void SetGameGraphicsTranslation(LifeGameGraphicsContext_t *context, Vector3_t *const translation)
+{
+  Vector3Set(&context->translation, translation->x, translation->y, translation->z);
+  SetQuadTranslation(context->pCellDrawData, &context->translation);
+  SetQuadTranslation(context->pRegionDrawData, &context->translation);
+}
+
+void GetGameGraphicsScale(Vector3_t *scale, LifeGameGraphicsContext_t *const context)
+{
+  Vector3Set(scale, context->scale.x, context->scale.y, context->scale.z);
+}
+
+void SetGameGraphicsScale(LifeGameGraphicsContext_t *context, Vector3_t *const scale)
+{
+  Vector3Set(&context->scale, scale->x, scale->y, scale->z);
+  SetQuadScale(context->pCellDrawData, &context->scale);
+  SetQuadScale(context->pRegionDrawData, &context->scale);
+}
+
+void SetCellDrawColor(LifeGameGraphicsContext_t *context, Vector3_t *const rgb)
+{
+  Vector3_t color;
+  Vector3Set(&color, rgb->x, rgb->y, rgb->z);
+  SetQuadColor(context->pCellDrawData, rgb);
+}
+
+void SetRegionDrawColor(LifeGameGraphicsContext_t *context, Vector3_t *const rgb)
+{
+  Vector3_t color;
+  Vector3Set(&color, rgb->x, rgb->y, rgb->z);
+  SetQuadColor(context->pRegionDrawData, rgb);
+}
+
+void DrawRegionsEnabled(LifeGameGraphicsContext_t *context, int enabled)
+{
+  if (enabled)
+    context->bDrawRegions = 1;
+  else
+    context->bDrawRegions = 0;
+}
+
+/* static to-be*/ 
+void DrawGame(SDL_Window *window, LifeGameGraphicsContext_t *context)
+{
+
+}
+
 void SyncWorldToScreen(SDL_Window *window, ThreadedLifeContext_t *worldContext, LifeGameGraphicsContext_t *graphicsContext, int syncRateHz)
 {
   static unsigned long endTime = 0;
@@ -50,8 +102,19 @@ void SyncWorldToScreen(SDL_Window *window, ThreadedLifeContext_t *worldContext, 
     SDL_LockMutex(worldContext->lock);
     CopyWorld(graphicsContext->pWorldRenderBuffer, worldContext->front);
     SDL_UnlockMutex(worldContext->lock);
-    DrawWorld(window, graphicsContext);
 		//end crititcal section!
+
+    //test code:
+    Vector3_t scaleModifier; 
+    Vector3Set(&scaleModifier, 0.01, 0.01, 0.0);
+    Vector3_t currentScale;
+    GetGameGraphicsScale(&currentScale, graphicsContext);
+    Vector3_t newScale;
+    Vector3Add(&newScale, &currentScale, &scaleModifier);
+    SetGameGraphicsScale(graphicsContext, &newScale);
+
+
+    DrawWorld(window, graphicsContext);
 
 		if (syncRateHz > 0)
 		{
@@ -64,6 +127,13 @@ void SyncWorldToScreen(SDL_Window *window, ThreadedLifeContext_t *worldContext, 
 
 void DrawWorld(SDL_Window *window, LifeGameGraphicsContext_t *graphicsContext)
 {
+  /*
+  SetQuadTranslation(graphicsContext->pCellDrawData, &graphicsContext->translation);
+  SetQuadTranslation(graphicsContext->pRegionDrawData, &graphicsContext->translation);
+  SetQuadScale(graphicsContext->pCellDrawData, &graphicsContext->scale);
+  SetQuadScale(graphicsContext->pRegionDrawData, &graphicsContext->scale);
+  */
+
   ClearScreen(0.1, 0.0, 0.0);
   int worldW, worldH;
   worldW = graphicsContext->pWorldRenderBuffer->width;

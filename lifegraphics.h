@@ -5,12 +5,10 @@
 #include "threadlife.h"
 #include "vector3.h"
 
-/* as outline in my todo from 12/30/13 */
+//this should become opaque
 typedef struct LifeGameGraphicsContext_s {
-	//I guess these two bits kinda ARE necessary...
 	LifeWorldBuffer_t *pWorldRenderBuffer;
 	LifeWorldBuffer_t *pRegionRenderBuffer;
-
 	QuadDrawData_t *pCellDrawData;
 	QuadDrawData_t *pRegionDrawData;
 	Vector3_t scale;

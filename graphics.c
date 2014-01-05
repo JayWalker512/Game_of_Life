@@ -268,6 +268,21 @@ void ClearQuadDrawData(QuadDrawData_t *qDrawData)
 	qDrawData->numIndices = 0;
 }
 
+void SetQuadTranslation(QuadDrawData_t *dest, Vector3_t *const translation)
+{
+	Vector3Set(&dest->translation, translation->x, translation->y, translation->z);
+}
+
+void SetQuadScale(QuadDrawData_t *dest, Vector3_t *const scale)
+{
+	Vector3Set(&dest->scale, scale->x, scale->y, scale->z);
+}
+
+void SetQuadColor(QuadDrawData_t *dest, Vector3_t *const rgb)
+{
+	Vector3Set(&dest->rgb, rgb->x, rgb->y, rgb->z);
+}
+
 void DrawRect(QuadDrawData_t *QuadBuffer, 
 	float x, float y, float z, float w, float h)
 {
