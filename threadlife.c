@@ -153,10 +153,8 @@ void ThreadLifeMain(void *worldContext)
 {
   ThreadedLifeContext_t *context = worldContext;
 
-  Stack_t copyBlockQueue;
-  Stack_t simBlockQueue;
-  StackInit(&copyBlockQueue, NumRegions(context->frontRegions));
-  StackInit(&simBlockQueue, NumRegions(context->frontRegions));
+  Stack_t *copyBlockQueue = NewStack(NumRegions(context->frontRegions));
+  Stack_t *simBlockQueue = NewStack(NumRegions(context->frontRegions));
 
   unsigned long generations = 0;
   while (context->bRunning)
@@ -173,14 +171,14 @@ void ThreadLifeMain(void *worldContext)
     /* Do we even need to explicitly copy blocks that aren't being simulated? 
     Won't they be the same anyway? */
     ClearDirtyRegionBuffer(context->backRegions, 0); //0 means copy, 1 means simulate
-    BuildCopyAndSimBlockQueues(&copyBlockQueue, &simBlockQueue, context->frontRegions);
+    BuildCopyAndSimBlockQueues(copyBlockQueue, simBlockQueue, context->frontRegions);
 
     /* Copies blocks in front to back based on copyBlockQueue */
     /*CopyWorldBlocksFromQueue(context->back, context->front, 
         context->frontRegions, &copyBlockQueue);*/
     
     SimWorldBlocksFromQueue(context->back, context->backRegions, 
-        context->front, context->frontRegions, &simBlockQueue);
+        context->front, context->frontRegions, simBlockQueue);
 
     //renamed version of SwapThreadedLifeContextPointers()
     SwapThreadedLifeContextGenerationPointers(context);
@@ -214,8 +212,8 @@ void ThreadLifeMain(void *worldContext)
     }
   }
 
-  DestroyStack(&copyBlockQueue);
-  DestroyStack(&simBlockQueue);
+  DestroyStack(copyBlockQueue);
+  DestroyStack(simBlockQueue);
 }
 
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,

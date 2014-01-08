@@ -20,7 +20,22 @@
 	return 0;
 }*/
 
-void StackInit(Stack_t *Stack, int maxSize)
+Stack_t *NewStack(const int maxSize)
+{
+	Stack_t *stack;
+	stack = malloc(sizeof(Stack_t));
+	stack->contents = malloc(sizeof(stackElement_t) * maxSize);
+
+	stack->maxSize = maxSize;
+	stack->index = -1;
+
+	for (int i = 0; i < stack->maxSize; i++)
+		stack->contents[i] = 0;
+
+	return stack;
+}
+
+/*void StackInit(Stack_t *Stack, int maxSize)
 {
 	Stack->index = -1;
 	Stack->maxSize = maxSize;
@@ -29,11 +44,12 @@ void StackInit(Stack_t *Stack, int maxSize)
 	int i;
 	for (i=0;i<Stack->maxSize;i++)
 		Stack->contents[i] = 0;
-}
+}*/
 
 void DestroyStack(Stack_t *Stack)
 {
 	free(Stack->contents);
+	free(Stack);
 }
 
 int StackPush(Stack_t *Stack, stackElement_t input)

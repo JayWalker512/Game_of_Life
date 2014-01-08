@@ -6,7 +6,7 @@ typedef struct Stack_s {
 	int maxSize;
 } Stack_t;
 
-void StackInit(Stack_t *Stack, int maxSize);
+Stack_t *NewStack(const int maxSize);
 void DestroyStack(Stack_t *Stack);
 int StackPush(Stack_t *Stack, stackElement_t input);
 stackElement_t StackPop(Stack_t *Stack);
