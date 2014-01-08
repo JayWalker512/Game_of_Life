@@ -38,7 +38,7 @@ void SwapDirtyRegionPointers(DirtyRegionBuffer_t **front, DirtyRegionBuffer_t **
 //combines the above two functions in to one so we only need to lock once.
 void SwapThreadedLifeContextGenerationPointers(ThreadedLifeContext_t *worldContext);
 
-void CopyWorld(LifeWorldBuffer_t *dest, LifeWorldBuffer_t * const source);
+int CopyWorld(LifeWorldBuffer_t *dest, LifeWorldBuffer_t * const source);
 
 LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world);
 void SetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world, LifeWorldCell_t state);

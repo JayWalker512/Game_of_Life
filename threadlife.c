@@ -329,22 +329,23 @@ void SwapThreadedLifeContextGenerationPointers(ThreadedLifeContext_t *worldConte
   SDL_UnlockMutex(worldContext->lock);
 }
 
-void CopyWorld(LifeWorldBuffer_t *dest, LifeWorldBuffer_t * const source)
+int CopyWorld(LifeWorldBuffer_t *dest, LifeWorldBuffer_t * const source)
 {
   //when we implement threading, this will have to lock the source & dest
 	//^this is done by the calling function.
-  assert(source->width == dest->width);
-  assert(source->height == dest->height);
+  //returns 1 on success, 0 on fail.
 
-  LifeWorldDim_t x = 0;
-  LifeWorldDim_t y = 0;
-  for (y = 0; y < source->height; y++)
+  if (dest->width != source->width)
+    return 0;
+
+  if (dest->height != source->height)
+    return 0;
+
+  for (int i = 0; i < (dest->width * dest->height); i++)
   {
-    for (x = 0; x < source->width; x++)
-    {
-      SetCellState(x, y, dest, GetCellState(x, y, source));
-    }
+    dest->world[i] = source->world[i];
   }
+  return 1;
 }
 
 LifeWorldCell_t GetCellState(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world)
