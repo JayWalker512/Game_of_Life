@@ -1,10 +1,5 @@
 typedef int stackElement_t;
-
-typedef struct Stack_s {
-	stackElement_t *contents;
-	int index;
-	int maxSize;
-} Stack_t;
+typedef struct Stack_s Stack_t;
 
 Stack_t *NewStack(const int maxSize);
 void DestroyStack(Stack_t *Stack);

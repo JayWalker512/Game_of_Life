@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include "stack.h"
 
+typedef struct Stack_s {
+	stackElement_t *contents;
+	int index;
+	int maxSize;
+} Stack_t;
+
 //unit test
 /*int main(int argc, char *argv[])
 {
@@ -34,17 +40,6 @@ Stack_t *NewStack(const int maxSize)
 
 	return stack;
 }
-
-/*void StackInit(Stack_t *Stack, int maxSize)
-{
-	Stack->index = -1;
-	Stack->maxSize = maxSize;
-	Stack->contents = (stackElement_t *)malloc(Stack->maxSize * sizeof(stackElement_t));
-	
-	int i;
-	for (i=0;i<Stack->maxSize;i++)
-		Stack->contents[i] = 0;
-}*/
 
 void DestroyStack(Stack_t *Stack)
 {
