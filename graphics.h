@@ -5,8 +5,23 @@
 #include <SDL2/SDL.h>
 #include "vector3.h"
 
-//go go gadget data hiding!
-typedef struct QuadDrawData_s QuadDrawData_t;
+typedef struct QuadDrawData_s {
+	float *vertexArray;
+	GLuint *indexArray;
+	int vertexArraySize;
+	int indexArraySize;
+	int numVerts;
+	int numIndices;
+	GLuint vao;
+	GLuint vbo;
+	GLuint shader;
+	GLint scaleLoc;
+	GLint translationLoc;
+	GLint rgbLoc;
+	Vector3_t scale;
+	Vector3_t translation;
+	Vector3_t rgb;
+} QuadDrawData_t; //don't modify this struct by hand! Only in functions!
 
 SDL_Window *InitSDL(int winWidth, int winHeight, const char *title, char bFull);
 SDL_GLContext InitSDL_GL(SDL_Window *window);

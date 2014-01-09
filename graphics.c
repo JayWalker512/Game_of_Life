@@ -2,24 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct QuadDrawData_s {
-	float *vertexArray;
-	GLuint *indexArray;
-	int vertexArraySize;
-	int indexArraySize;
-	int numVerts;
-	int numIndices;
-	GLuint vao;
-	GLuint vbo;
-	GLuint shader;
-	GLint scaleLoc;
-	GLint translationLoc;
-	GLint rgbLoc;
-	Vector3_t scale;
-	Vector3_t translation;
-	Vector3_t rgb;
-} QuadDrawData_t; //don't modify this struct by hand! Only in functions!
-
 static float *AllocateQuadArray(const int numQuads); //used in NewQuadDataBuffer
 static GLuint *AllocateIndexArray(const int numQuads); //used in NewQuadDataBuffer
 static GLuint CreateShader(GLenum eShaderType, const char *strShaderFile);

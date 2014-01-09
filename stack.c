@@ -2,12 +2,6 @@
 #include <stdlib.h>
 #include "stack.h"
 
-typedef struct Stack_s {
-	stackElement_t *contents;
-	int index;
-	int maxSize;
-} Stack_t;
-
 //unit test
 /*int main(int argc, char *argv[])
 {
