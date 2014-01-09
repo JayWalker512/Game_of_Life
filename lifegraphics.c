@@ -21,10 +21,11 @@ LifeGameGraphicsContext_t *CreateLifeGameGraphicsContext(ThreadedLifeContext_t *
   graphicsContext->pCellDrawData = NewQuadDataBuffer(worldFrontBufferWidth *worldFrontBufferHeight);
   graphicsContext->pRegionDrawData = NewQuadDataBuffer((worldFrontBufferWidth / regionDims) *
       (worldFrontBufferHeight / regionDims));
+  graphicsContext->pBackgroundDrawData = NewQuadDataBuffer(1);
 
   Vector3Set(&graphicsContext->scale, 1.0, 1.0, 1.0);
   Vector3Set(&graphicsContext->translation, 0.0, 0.0, 0.0);
-  char bDrawRegions = 0;
+  graphicsContext->bDrawRegions = 0;
 
   return graphicsContext;
 
@@ -51,6 +52,7 @@ void SetGameGraphicsTranslation(LifeGameGraphicsContext_t *context, Vector3_t *c
   Vector3Set(&context->translation, translation->x, translation->y, translation->z);
   SetQuadTranslation(context->pCellDrawData, &context->translation);
   SetQuadTranslation(context->pRegionDrawData, &context->translation);
+  SetQuadTranslation(context->pBackgroundDrawData, &context->translation);
 }
 
 void GetGameGraphicsScale(Vector3_t *scale, LifeGameGraphicsContext_t *const context)
@@ -63,6 +65,7 @@ void SetGameGraphicsScale(LifeGameGraphicsContext_t *context, Vector3_t *const s
   Vector3Set(&context->scale, scale->x, scale->y, scale->z);
   SetQuadScale(context->pCellDrawData, &context->scale);
   SetQuadScale(context->pRegionDrawData, &context->scale);
+  SetQuadScale(context->pBackgroundDrawData, &context->scale);
 }
 
 void SetCellDrawColor(LifeGameGraphicsContext_t *context, Vector3_t *const rgb)
@@ -77,6 +80,13 @@ void SetRegionDrawColor(LifeGameGraphicsContext_t *context, Vector3_t *const rgb
   Vector3_t color;
   Vector3Set(&color, rgb->x, rgb->y, rgb->z);
   SetQuadColor(context->pRegionDrawData, rgb);
+}
+
+void SetBackgroundDrawColor(LifeGameGraphicsContext_t *context, Vector3_t *const rgb)
+{
+  Vector3_t color;
+  Vector3Set(&color, rgb->x, rgb->y, rgb->z);
+  SetQuadColor(context->pBackgroundDrawData, rgb);
 }
 
 void DrawRegionsEnabled(LifeGameGraphicsContext_t *context, int enabled)
@@ -124,7 +134,7 @@ void DrawWorld(SDL_Window *window, LifeGameGraphicsContext_t *graphicsContext)
   SetQuadScale(graphicsContext->pRegionDrawData, &graphicsContext->scale);
   */
 
-  ClearScreen(0.1, 0.0, 0.0);
+  ClearScreen(0.0, 0.0, 0.0);
   int worldW, worldH;
   worldW = graphicsContext->pWorldRenderBuffer->width;
   worldH =  graphicsContext->pWorldRenderBuffer->height;
@@ -147,6 +157,18 @@ void DrawWorld(SDL_Window *window, LifeGameGraphicsContext_t *graphicsContext)
     }
   }
 
+  Vector3_t backColor;
+  Vector3Set(&backColor, 0.04, 0.00, 0.00);
+  SetBackgroundDrawColor(graphicsContext, &backColor);
+  DrawRect(graphicsContext->pBackgroundDrawData, 0.0, 0.0, 0.0, 1.0, 1.0);
+  DrawQuadData(graphicsContext->pBackgroundDrawData);
+  ClearQuadDrawData(graphicsContext->pBackgroundDrawData);
+
+  //region drawing goes here eventually.
+
+  Vector3_t cellColor;
+  Vector3Set(&cellColor, 1.0, 0.0, 0.0);
+  SetCellDrawColor(graphicsContext, &cellColor);
   DrawQuadData(graphicsContext->pCellDrawData);
   ClearQuadDrawData(graphicsContext->pCellDrawData);
   SDL_GL_SwapWindow(window);

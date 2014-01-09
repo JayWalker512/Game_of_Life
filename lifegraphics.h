@@ -11,6 +11,7 @@ typedef struct LifeGameGraphicsContext_s {
 	LifeWorldBuffer_t *pRegionRenderBuffer;
 	QuadDrawData_t *pCellDrawData;
 	QuadDrawData_t *pRegionDrawData;
+	QuadDrawData_t *pBackgroundDrawData;
 	Vector3_t scale;
 	Vector3_t translation;
 	char bDrawRegions;
@@ -24,6 +25,7 @@ void GetGameGraphicsScale(Vector3_t *scale, LifeGameGraphicsContext_t *const con
 void SetGameGraphicsScale(LifeGameGraphicsContext_t *context, Vector3_t *const scale);
 void SetCellDrawColor(LifeGameGraphicsContext_t *context, Vector3_t *const rgb);
 void SetRegionDrawColor(LifeGameGraphicsContext_t *context, Vector3_t *const rgb);
+void SetBackgroundDrawColor(LifeGameGraphicsContext_t *context, Vector3_t *const rgb);
 void DrawRegionsEnabled(LifeGameGraphicsContext_t *context, int enabled);
 /* static to-be*/ void DrawGame(SDL_Window *window, LifeGameGraphicsContext_t *context);
 
