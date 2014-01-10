@@ -39,6 +39,7 @@ void DestroyLifeGameGraphicsContext(LifeGameGraphicsContext_t *context)
   DestroyLifeWorld(context->pRegionRenderBuffer);
   DestroyQuadDrawData(context->pCellDrawData);
   DestroyQuadDrawData(context->pRegionDrawData); //this call destroys shaders too right?
+  DestroyQuadDrawData(context->pBackgroundDrawData);
   free(context);
 }
 

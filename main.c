@@ -1,17 +1,19 @@
 //Game of Life
 //Brandon Foltz
 //use this line to compile me:
-//gcc main.c threadlife.c graphics.c lifegraphics.c loadfile.c dirtyregion.c stack.c vector3.c -o gameoflife -std=c99 -Wall -Wextra -pedantic -g -D_GNU_SOURCE -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm
+//gcc main.c threadlife.c graphics.c lifegraphics.c loadfile.c dirtyregion.c stack.c vector3.c binary.c -o gameoflife -std=c99 -Wall -Wextra -pedantic -g -D_GNU_SOURCE -I/usr/local/include/SDL2 -lSDL2 -I/usr/include/GL -lGL -lGLEW -lm
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <assert.h>
 #include "main.h"
 #include "threadlife.h"
 #include "lifegraphics.h"
 #include "loadfile.h"
 #include "vector3.h"
+#include "binary.h"
 #include <SDL2/SDL.h>
 
 typedef struct LifeArgOptions_s {
@@ -19,9 +21,9 @@ typedef struct LifeArgOptions_s {
   LifeWorldDim_t worldHeight;
   int resX;
   int resY;
+  LifeRules_t lifeRules;
   int regionSize;
   char bFullScreen;
-  char bBenchmarking;
   char lifeFile[MAX_FILENAME_LENGTH];
 } LifeArgOptions_t;
 
@@ -55,8 +57,8 @@ int main(int argc, char **argv)
   SDL_GLContext glContext = InitSDL_GL(window);
 
   ThreadedLifeContext_t *worldContext = 
-    CreateThreadedLifeContext(options.worldWidth, options.worldHeight,
-    options.regionSize, 0, 1, options.lifeFile); //default block size of 8 for now
+    CreateThreadedLifeContext(options.worldWidth, options.worldHeight, 
+      &options.lifeRules, options.regionSize, 0, 1, options.lifeFile); //default block size of 8 for now
   if (worldContext == NULL)
   {
     printf("Failed to ThreadedLifeContext_t!\n");
@@ -251,17 +253,18 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
 {
   //set default options first, then parse for changes.
   options->bFullScreen = 0;
-  options->bBenchmarking = 0;
   options->worldWidth = 400;
   options->worldHeight = 300;
   options->regionSize = 4; //4 seems to be the fastest. Minimum is 2, 1 breaks sim.
   options->resX = 1024;
   options->resY = 768;
   options->lifeFile[0] = '\0';
+  options->lifeRules.birthMask = 8;
+  options->lifeRules.survivalMask = 12;
   char *cvalue = NULL;
 
   int c;
-  while ((c = getopt(argc, argv, "l:x:y:w:h:r:fb")) != -1 )
+  while ((c = getopt(argc, argv, "l:x:y:w:h:r:b:s:f")) != -1 )
   {
     switch (c)
     {
@@ -269,7 +272,12 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
         options->bFullScreen = 1;
         break;
       case 'b':
-        options->bBenchmarking = 1;
+        cvalue = optarg;
+        options->lifeRules.birthMask = GetMaskFromStringInt(cvalue);
+        break;
+      case 's':
+        cvalue = optarg;
+        options->lifeRules.survivalMask = GetMaskFromStringInt(cvalue);
         break;
       case 'x':
         cvalue = optarg;

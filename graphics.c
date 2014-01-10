@@ -179,7 +179,7 @@ GLuint CreateShader(GLenum eShaderType, const char *strShaderFile)
 
 QuadDrawData_t *NewQuadDataBuffer(const int numQuads)
 {
-	QuadDrawData_t *qDrawData = malloc(sizeof(QuadDrawData_t));
+	QuadDrawData_t *qDrawData = (QuadDrawData_t *)malloc(sizeof(QuadDrawData_t));
 	qDrawData->vertexArray = AllocateQuadArray(numQuads);
 	qDrawData->indexArray = AllocateIndexArray(numQuads);
 	qDrawData->vertexArraySize = (sizeof(float) * 4 * 4) * numQuads; //hardcoded
@@ -215,6 +215,17 @@ QuadDrawData_t *NewQuadDataBuffer(const int numQuads)
 	return qDrawData;
 }
 
+void DestroyQuadDrawData(QuadDrawData_t *qDrawData)
+{
+	glDeleteProgram(qDrawData->shader);
+	glDeleteBuffers(1, &qDrawData->vbo);
+	glDeleteVertexArrays(1, &qDrawData->vao);
+
+	free(qDrawData->vertexArray);
+	free(qDrawData->indexArray);
+	free(qDrawData);
+}
+
 char SetQuadShader(QuadDrawData_t *qDrawData, GLuint shader)
 {
 	if (shader == (unsigned int)-1)
@@ -224,26 +235,14 @@ char SetQuadShader(QuadDrawData_t *qDrawData, GLuint shader)
 	return 1;
 }
 
-void DestroyQuadDrawData(QuadDrawData_t *qDrawData)
-{
-	glDeleteProgram(qDrawData->shader);
-	glDeleteBuffers(1, &qDrawData->vbo);
-	glDeleteVertexArrays(1, &qDrawData->vao);
-	glDeleteProgram(qDrawData->shader);
-
-	free(qDrawData->vertexArray);
-	free(qDrawData->indexArray);
-	free(qDrawData);
-}
-
 float *AllocateQuadArray(const int numQuads)
 {
-	return malloc((sizeof(float) * 4 * 4) * numQuads); //verts are four-component vec
+	return (float *)malloc((sizeof(float) * 4 * 4) * numQuads); //verts are four-component vec
 }
 
 GLuint *AllocateIndexArray(const int numQuads)
 {
-	return malloc((sizeof(GLuint) * 6) * numQuads);
+	return (GLuint *)malloc((sizeof(GLuint) * 6) * numQuads);
 }
 
 void ClearQuadDrawData(QuadDrawData_t *qDrawData)

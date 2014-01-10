@@ -6,6 +6,7 @@
 #include "threadlife.h"
 #include "loadfile.h"
 #include "stack.h"
+#include "binary.h"
 
 /* STATIC FUNCTIONS DECLARED AND DEFINED HERE! */
 
@@ -77,7 +78,7 @@ static void MarkAffectedRegions(LifeWorldDim_t x, LifeWorldDim_t y, DirtyRegionB
 }
 
 static void SimWorldBlock(LifeWorldBuffer_t *back, DirtyRegionBuffer_t *backRegions,
-  LifeWorldBuffer_t *front,
+  LifeWorldBuffer_t *front, LifeRules_t *lifeRules,
   LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldDim_t w, LifeWorldDim_t h)
 {
   //If the block didn't change state at all during simulation, we copy it to the
@@ -96,14 +97,18 @@ static void SimWorldBlock(LifeWorldBuffer_t *back, DirtyRegionBuffer_t *backRegi
     {
       int numNeighbors = NumLiveNeighbors(iterX, iterY, front);
       int cellIsLiving = GetCellState(iterX, iterY, front);
+
+      int neighborsMask = 0;
+      SetBitInt(&neighborsMask, numNeighbors);
+
       if (cellIsLiving)
       {
-        if (numNeighbors >= 2 && numNeighbors <= 3)
+        if (neighborsMask & lifeRules->survivalMask)
         {
           SetCellState(iterX, iterY, back, 1); //cell was alive, stays alive
           //need not mark regions if nothing changed.
         }
-        else if (numNeighbors < 2 || numNeighbors > 3)
+        else if (neighborsMask & ~(lifeRules->survivalMask))
         {
           SetCellState(iterX, iterY, back, 0);
           MarkAffectedRegions(iterX, iterY, backRegions);
@@ -111,18 +116,18 @@ static void SimWorldBlock(LifeWorldBuffer_t *back, DirtyRegionBuffer_t *backRegi
         }
       }
 
-      if (!cellIsLiving && numNeighbors == 3) //dead cell becomes living
+      if (!cellIsLiving && (neighborsMask & lifeRules->birthMask)) //dead cell becomes living
       {
         SetCellState(iterX, iterY, back, 1);
         MarkAffectedRegions(iterX, iterY, backRegions);
         bBlockChangedState = 1;
       }
-      else if (!cellIsLiving && numNeighbors != 3)
+      else if (!cellIsLiving && (neighborsMask & ~(lifeRules->birthMask)))
       {
         SetCellState(iterX, iterY, back, 0); 
-        /* Cell stays dead. We must make sure we write to every cell in the new
-        buffer whether it changes or not, to overwrite the previous state it contained.
-        This is to avoid having to clear each destination block prior to simulation. */
+        //Cell stays dead. We must make sure we write to every cell in the new
+        //buffer whether it changes or not, to overwrite the previous state it contained.
+        //This is to avoid having to clear each destination block prior to simulation. 
       }
     }
   }
@@ -134,7 +139,8 @@ static void SimWorldBlock(LifeWorldBuffer_t *back, DirtyRegionBuffer_t *backRegi
 }
 
 static void SimWorldBlocksFromQueue(LifeWorldBuffer_t *back, DirtyRegionBuffer_t *backRegions, 
-        LifeWorldBuffer_t *front, DirtyRegionBuffer_t *frontRegions, Stack_t *simBlockQueue)
+        LifeWorldBuffer_t *front, DirtyRegionBuffer_t *frontRegions, Stack_t *simBlockQueue,
+        LifeRules_t *lifeRules)
 {
   while (!StackIsEmpty(simBlockQueue))
   {
@@ -143,7 +149,7 @@ static void SimWorldBlocksFromQueue(LifeWorldBuffer_t *back, DirtyRegionBuffer_t
     int dim = 0;
     int region = StackPop(simBlockQueue);
     GetRegionSourceDims(frontRegions, region, &x, &y, &dim, &dim);
-    SimWorldBlock(back, backRegions, front, x, y, dim, dim);
+    SimWorldBlock(back, backRegions, front, lifeRules, x, y, dim, dim);
   }
 }
 
@@ -178,7 +184,8 @@ void ThreadLifeMain(void *worldContext)
         context->frontRegions, &copyBlockQueue);*/
     
     SimWorldBlocksFromQueue(context->back, context->backRegions, 
-        context->front, context->frontRegions, simBlockQueue);
+        context->front, context->frontRegions, simBlockQueue, 
+        &context->lifeRules);
 
     //renamed version of SwapThreadedLifeContextPointers()
     SwapThreadedLifeContextGenerationPointers(context);
@@ -217,7 +224,7 @@ void ThreadLifeMain(void *worldContext)
 }
 
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
-    int regionSize, char bRandomize, char bSimulating, const char *lifeFile)
+    LifeRules_t *lifeRules, int regionSize, char bRandomize, char bSimulating, const char *lifeFile)
 {
   ThreadedLifeContext_t *context = malloc(sizeof(ThreadedLifeContext_t));
 
@@ -265,6 +272,9 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
       snprintf(context->lifeFile, MAX_FILENAME_LENGTH, "%s", lifeFile);
     }
   }
+
+  context->lifeRules.birthMask = lifeRules->birthMask;
+  context->lifeRules.survivalMask = lifeRules->survivalMask;
  
   context->bReloadFile = 0;
   context->bRandomize = 0; //we only want to randomize once from here or not at all
