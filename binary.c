@@ -12,10 +12,7 @@ int GetMaskFromStringInt(const char *bitString)
 		char tmp[2];
 		tmp[0] = bitString[i];
 		tmp[1] = '\0';
-		//printf("tmp: %s\n", tmp);
-		int bit = atoi(tmp); //atoi converts a STRINT not a char. Duh. 
-		//that explains the 1024 garbage error. Use strtol eventually.
-		//printf("Bit: %d\n", bit);
+		int bit = strtol(tmp, NULL, 10);
 		SetBitInt(&outMask, bit);
 	}
 
