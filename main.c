@@ -14,6 +14,7 @@
 #include "loadfile.h"
 #include "vector3.h"
 #include "binary.h"
+#include "input.h"
 #include <SDL2/SDL.h>
 
 typedef struct LifeArgOptions_s {
@@ -64,6 +65,8 @@ int main(int argc, char **argv)
     return 1;
   }
 
+  InputDeviceValues_t keys;
+  InitializeKeyPresses(&keys);
   //we start this loop in main thread that only does rendering and input
   while (worldContext->bRunning)
   {
@@ -71,8 +74,6 @@ int main(int argc, char **argv)
     SyncWorldToScreen(window, worldContext, graphicsContext, 60);
 
     //input handling
-    InputDeviceValues_t keys;
-    InitializeKeyPresses(&keys);
     CheckInput(&keys);
     HandleInput(worldContext, graphicsContext, &keys);
   }

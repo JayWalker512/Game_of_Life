@@ -54,175 +54,178 @@ char CheckInput(InputDeviceValues_t *keys)
   SDL_Event event;
   while (SDL_PollEvent(&event))
   {
-    if (event.type == SDL_QUIT)
+  	if (event.key.repeat == 0)
     {
-      PushValueOnTwoElementArray(keys->esc, 1);
-      escChanged = 1;
-    }
+	    if (event.type == SDL_QUIT)
+	    {
+	      PushValueOnTwoElementArray(keys->esc, 1);
+	      escChanged = 1;
+	    }
 
-    if (event.type == SDL_KEYDOWN)
-    {
-      if (event.key.keysym.sym == SDLK_ESCAPE)
-      {
-      	PushValueOnTwoElementArray(keys->esc, 1);
-      	escChanged = 1;
-      }
+	    if (event.type == SDL_KEYDOWN)
+	    {
+	      if (event.key.keysym.sym == SDLK_ESCAPE)
+	      {
+	      	PushValueOnTwoElementArray(keys->esc, 1);
+	      	escChanged = 1;
+	      }
 
-      if (event.key.keysym.sym == SDLK_SPACE)
-      {
-      	PushValueOnTwoElementArray(keys->space, 1);
-      	spaceChanged = 1;
-      }
+	      if (event.key.keysym.sym == SDLK_SPACE)
+	      {
+	      	PushValueOnTwoElementArray(keys->space, 1);
+	      	spaceChanged = 1;
+	      }
 
-      if (event.key.keysym.sym == SDLK_r)
-      {
-      	PushValueOnTwoElementArray(keys->r, 1);
-      	rChanged = 1;
-      }
+	      if (event.key.keysym.sym == SDLK_r)
+	      {
+	      	PushValueOnTwoElementArray(keys->r, 1);
+	      	rChanged = 1;
+	      }
 
-      if (event.key.keysym.sym == SDLK_z)
-      {
-      	PushValueOnTwoElementArray(keys->z, 1);
-      	zChanged = 1;
-      }
+	      if (event.key.keysym.sym == SDLK_z)
+	      {
+	      	PushValueOnTwoElementArray(keys->z, 1);
+	      	zChanged = 1;
+	      }
 
-      if (event.key.keysym.sym == SDLK_c)
-      {
-      	PushValueOnTwoElementArray(keys->c, 1);
-      	cChanged = 1;
-      }
+	      if (event.key.keysym.sym == SDLK_c)
+	      {
+	      	PushValueOnTwoElementArray(keys->c, 1);
+	      	cChanged = 1;
+	      }
 
-      if (event.key.keysym.sym == SDLK_PLUS)
-      {
-      	PushValueOnTwoElementArray(keys->plus, 1);
-      	plusChanged = 1;
-      }
+	      if (event.key.keysym.sym == SDLK_PLUS)
+	      {
+	      	PushValueOnTwoElementArray(keys->plus, 1);
+	      	plusChanged = 1;
+	      }
 
-      if (event.key.keysym.sym == SDLK_MINUS)
-      {
-      	PushValueOnTwoElementArray(keys->minus, 1);
-      	minusChanged = 1;
-      }
-    }
+	      if (event.key.keysym.sym == SDLK_MINUS)
+	      {
+	      	PushValueOnTwoElementArray(keys->minus, 1);
+	      	minusChanged = 1;
+	      }
+	    }
 
-    if (event.type == SDL_KEYUP)
-    {
-      if (event.key.keysym.sym == SDLK_ESCAPE)
-      {
-      	PushValueOnTwoElementArray(keys->esc, 0);
-      	escChanged = 1;
-      }
+	    if (event.type == SDL_KEYUP)
+	    {
+	      if (event.key.keysym.sym == SDLK_ESCAPE)
+	      {
+	      	PushValueOnTwoElementArray(keys->esc, 0);
+	      	escChanged = 1;
+	      }
 
-      if (event.key.keysym.sym == SDLK_SPACE)
-      {
-      	PushValueOnTwoElementArray(keys->space, 0);
-      	spaceChanged = 1;
-      }
+	      if (event.key.keysym.sym == SDLK_SPACE)
+	      {
+	      	PushValueOnTwoElementArray(keys->space, 0);
+	      	spaceChanged = 1;
+	      }
 
-      if (event.key.keysym.sym == SDLK_r)
-      {
-      	PushValueOnTwoElementArray(keys->r, 0);
-      	rChanged = 1;
-      }
+	      if (event.key.keysym.sym == SDLK_r)
+	      {
+	      	PushValueOnTwoElementArray(keys->r, 0);
+	      	rChanged = 1;
+	      }
 
-      if (event.key.keysym.sym == SDLK_z)
-      {
-      	PushValueOnTwoElementArray(keys->z, 0);
-      	zChanged = 1;
-      }
+	      if (event.key.keysym.sym == SDLK_z)
+	      {
+	      	PushValueOnTwoElementArray(keys->z, 0);
+	      	zChanged = 1;
+	      }
 
-      if (event.key.keysym.sym == SDLK_c)
-      {
-      	PushValueOnTwoElementArray(keys->c, 0);
-      	cChanged = 1;
-      }
+	      if (event.key.keysym.sym == SDLK_c)
+	      {
+	      	PushValueOnTwoElementArray(keys->c, 0);
+	      	cChanged = 1;
+	      }
 
-      if (event.key.keysym.sym == SDLK_PLUS)
-      {
-      	PushValueOnTwoElementArray(keys->plus, 0);
-      	plusChanged = 1;
-      }
+	      if (event.key.keysym.sym == SDLK_PLUS)
+	      {
+	      	PushValueOnTwoElementArray(keys->plus, 0);
+	      	plusChanged = 1;
+	      }
 
-      if (event.key.keysym.sym == SDLK_MINUS)
-      {
-      	PushValueOnTwoElementArray(keys->minus, 0);
-      	minusChanged = 1;
-      }
-    }
+	      if (event.key.keysym.sym == SDLK_MINUS)
+	      {
+	      	PushValueOnTwoElementArray(keys->minus, 0);
+	      	minusChanged = 1;
+	      }
+	    }
 
-    if (event.type == SDL_MOUSEBUTTONDOWN)
-    {
-      //printf("Pressed button: %d\n", event.button.button);
-      if (event.button.button == SDL_BUTTON_LEFT)
-      {
-      	PushValueOnTwoElementArray(keys->leftClick, 1);
-      	leftClickChanged = 1;
-      }
+	    if (event.type == SDL_MOUSEBUTTONDOWN)
+	    {
+	      //printf("Pressed button: %d\n", event.button.button);
+	      if (event.button.button == SDL_BUTTON_LEFT)
+	      {
+	      	PushValueOnTwoElementArray(keys->leftClick, 1);
+	      	leftClickChanged = 1;
+	      }
 
-      if (event.button.button == SDL_BUTTON_RIGHT)
-      {
-      	PushValueOnTwoElementArray(keys->rightClick, 1);
-      	rightClickChanged = 1;
-      }
-    }
+	      if (event.button.button == SDL_BUTTON_RIGHT)
+	      {
+	      	PushValueOnTwoElementArray(keys->rightClick, 1);
+	      	rightClickChanged = 1;
+	      }
+	    }
 
-    if (event.type == SDL_MOUSEBUTTONUP)
-    {
-      //printf("Released button: %d\n", event.button.button);
-      if (event.button.button == SDL_BUTTON_LEFT)
-      {
-        PushValueOnTwoElementArray(keys->leftClick, 0);
-      	leftClickChanged = 1;
-      }
+	    if (event.type == SDL_MOUSEBUTTONUP)
+	    {
+	      //printf("Released button: %d\n", event.button.button);
+	      if (event.button.button == SDL_BUTTON_LEFT)
+	      {
+	        PushValueOnTwoElementArray(keys->leftClick, 0);
+	      	leftClickChanged = 1;
+	      }
 
-      if (event.button.button == SDL_BUTTON_RIGHT)
-      {
-        PushValueOnTwoElementArray(keys->rightClick, 0);
-      	rightClickChanged = 1;
-      }
-    }
+	      if (event.button.button == SDL_BUTTON_RIGHT)
+	      {
+	        PushValueOnTwoElementArray(keys->rightClick, 0);
+	      	rightClickChanged = 1;
+	      }
+	    }
 
-    if (event.type == SDL_MOUSEWHEEL)
-    {
-      PushValueOnTwoElementArray(keys->scrollVal, event.wheel.y);
-      scrollValChanged = 1;
-    }
+	    if (event.type == SDL_MOUSEWHEEL)
+	    {
+	      PushValueOnTwoElementArray(keys->scrollVal, event.wheel.y);
+	      scrollValChanged = 1;
+	    }
 
-    if (event.type == SDL_MOUSEMOTION)
-    {
-      PushValueOnTwoElementArray(keys->mouseMotionX, event.motion.xrel);
-      PushValueOnTwoElementArray(keys->mouseMotionY, event.motion.yrel);
-      mouseMotionChanged = 1;
-      //printf("x,y motion: %d,%d\n", event.motion.xrel, event.motion.yrel);
-    }
-  }
+	    if (event.type == SDL_MOUSEMOTION)
+	    {
+	      PushValueOnTwoElementArray(keys->mouseMotionX, event.motion.xrel);
+	      PushValueOnTwoElementArray(keys->mouseMotionY, event.motion.yrel);
+	      mouseMotionChanged = 1;
+	      //printf("x,y motion: %d,%d\n", event.motion.xrel, event.motion.yrel);
+	    }
+	  }
+	}
 
   if (!escChanged)
-  	PushValueOnTwoElementArray(keys->esc, keys->esc[1]);
+  	PushValueOnTwoElementArray(keys->esc, keys->esc[0]);
 
   if (!spaceChanged)
-  	PushValueOnTwoElementArray(keys->space, keys->space[1]);
+  	PushValueOnTwoElementArray(keys->space, keys->space[0]);
 
   if (!rChanged)
-  	PushValueOnTwoElementArray(keys->r, keys->r[1]);
+  	PushValueOnTwoElementArray(keys->r, keys->r[0]);
 
   if (!zChanged)
-  	PushValueOnTwoElementArray(keys->z, keys->z[1]);
+  	PushValueOnTwoElementArray(keys->z, keys->z[0]);
 
   if (!cChanged)
-  	PushValueOnTwoElementArray(keys->c, keys->c[1]);
+  	PushValueOnTwoElementArray(keys->c, keys->c[0]);
 
   if (!plusChanged)
-  	PushValueOnTwoElementArray(keys->plus, keys->plus[1]);
+  	PushValueOnTwoElementArray(keys->plus, keys->plus[0]);
 
   if (!minusChanged)
-  	PushValueOnTwoElementArray(keys->minus, keys->minus[1]);
+  	PushValueOnTwoElementArray(keys->minus, keys->minus[0]);
 
   if (!leftClickChanged)
-  	PushValueOnTwoElementArray(keys->leftClick, keys->leftClick[1]);
+  	PushValueOnTwoElementArray(keys->leftClick, keys->leftClick[0]);
 
   if (!rightClickChanged)
-  	PushValueOnTwoElementArray(keys->rightClick, keys->rightClick[1]);
+  	PushValueOnTwoElementArray(keys->rightClick, keys->rightClick[0]);
 
   if (!scrollValChanged)
   	PushValueOnTwoElementArray(keys->scrollVal, 0);
@@ -287,7 +290,7 @@ char HandleInput(ThreadedLifeContext_t *worldContext,
     SetGameGraphicsScale(graphicsContext, &newScale);
   }
 
-  if (keys->leftClick[0] && !keys->leftClick[1])
+  if (keys->leftClick[0]) //key down at all
   {
     //printf("Translating: %d,%d\n", keys->mouseMotionX, keys->mouseMotionY);
     Vector3_t translationModifier;
