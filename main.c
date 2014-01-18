@@ -121,23 +121,23 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
         break;
       case 'x':
         cvalue = optarg;
-        options->resX = atoi(cvalue);
+        options->resX = strtol(cvalue, NULL, 10);
         break;
       case 'y':
         cvalue = optarg;
-        options->resY = atoi(cvalue);
+        options->resY = strtol(cvalue, NULL, 10);
         break;
       case 'w':
         cvalue = optarg;
-        options->worldWidth = atoi(cvalue);
+        options->worldWidth = strtol(cvalue, NULL, 10);
         break;
       case 'h':
         cvalue = optarg;
-        options->worldHeight = atoi(cvalue);
+        options->worldHeight = strtol(cvalue, NULL, 10);
         break;
       case 'r':
         cvalue = optarg;
-        options->regionSize = atoi(cvalue);
+        options->regionSize = strtol(cvalue, NULL, 10);
         if (options->regionSize < 2)
           options->regionSize = 2;
         break;
