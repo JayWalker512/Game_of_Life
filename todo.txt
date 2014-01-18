@@ -1,0 +1,13 @@
+Document to keep track of feature ideas and prioritization.
+
+High:
+Output more useful information on term, gens/s, frames/s, generation, time elapsed.
+
+C key should clear the world state.
+
++/- key speeds/slows simulation.
+
+Low:
+--help flag output explaining the various CLI flag options
+
+Support different edge effects: toroidal, dead edge, edge growth.
