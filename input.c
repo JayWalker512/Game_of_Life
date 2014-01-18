@@ -94,7 +94,7 @@ char CheckInput(InputDeviceValues_t *keys)
 	      	cChanged = 1;
 	      }
 
-	      if (event.key.keysym.sym == SDLK_PLUS)
+	      if (event.key.keysym.sym == SDLK_EQUALS)
 	      {
 	      	PushValueOnTwoElementArray(keys->plus, 1);
 	      	plusChanged = 1;
@@ -139,7 +139,7 @@ char CheckInput(InputDeviceValues_t *keys)
 	      	cChanged = 1;
 	      }
 
-	      if (event.key.keysym.sym == SDLK_PLUS)
+	      if (event.key.keysym.sym == SDLK_EQUALS)
 	      {
 	      	PushValueOnTwoElementArray(keys->plus, 0);
 	      	plusChanged = 1;
@@ -282,6 +282,23 @@ char HandleInput(ThreadedLifeContext_t *worldContext,
     worldContext->bSimulating = 1;
     worldContext->bRunning = 0;
   }
+
+  if (keys->plus[0] && !keys->plus[1])
+  {
+  	if (worldContext->generationDelayMs > 0)
+  		worldContext->generationDelayMs -= 10;
+
+  	if (worldContext->generationDelayMs < 0)
+  		worldContext->generationDelayMs = 0;
+
+  	printf("delay: %d\n", worldContext->generationDelayMs);
+  }
+
+	if (keys->minus[0] && !keys->minus[1])
+	{
+		worldContext->generationDelayMs += 10;
+		printf("delay: %d\n", worldContext->generationDelayMs);
+	}
 
   if (keys->scrollVal[0] != 0)
   {

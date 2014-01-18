@@ -191,6 +191,9 @@ void ThreadLifeMain(void *worldContext)
     SwapThreadedLifeContextGenerationPointers(context);
     generations = DoGensPerSec(generations);
 
+    //delay each simulation frame if necessary.
+    SDL_Delay(context->generationDelayMs);
+
     /*Quick an dirty way to pause simulation. 
     Maybe there's a better way with semaphores or something that won't peg
     all the cores while doing nothing?*/
@@ -286,7 +289,9 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
   context->lifeRules.birthMask = lifeRules->birthMask;
   context->lifeRules.survivalMask = lifeRules->survivalMask;
  
+  context->generationDelayMs = 0;
   context->bReloadFile = 0;
+  context->bClearWorld = 0;
   context->bRandomize = 0; //we only want to randomize once from here or not at all
   context->bSimulating = bSimulating;
   context->bRunning = 1; //if we're not running, the program is quitting

@@ -27,6 +27,7 @@ typedef struct ThreadedLifeContext_s {
 	DirtyRegionBuffer_t *backRegions;
 	SDL_mutex *lock;
 	LifeRules_t lifeRules;
+	int generationDelayMs;
 	char bRunning;
 	char bRandomize;
 	char bReloadFile;
