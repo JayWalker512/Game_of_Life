@@ -23,6 +23,7 @@ typedef struct LifeArgOptions_s {
   int resX;
   int resY;
   LifeRules_t lifeRules;
+  int syncRate;
   int regionSize;
   char bFullScreen;
   char lifeFile[MAX_FILENAME_LENGTH];
@@ -71,7 +72,7 @@ int main(int argc, char **argv)
   while (worldContext->bRunning)
   {
     //Draw world so we can see initial state. 
-    SyncWorldToScreen(window, worldContext, graphicsContext, 60);
+    SyncWorldToScreen(window, worldContext, graphicsContext, options.syncRate);
 
     //input handling
     CheckInput(&keys);
@@ -101,10 +102,11 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
   options->lifeFile[0] = '\0';
   options->lifeRules.birthMask = 8;
   options->lifeRules.survivalMask = 12;
+  options->syncRate = 60;
   char *cvalue = NULL;
 
   int c;
-  while ((c = getopt(argc, argv, "l:x:y:w:h:r:b:s:f")) != -1 )
+  while ((c = getopt(argc, argv, "l:x:y:w:h:r:b:s:f:z:")) != -1 )
   {
     switch (c)
     {
@@ -140,6 +142,13 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
         options->regionSize = strtol(cvalue, NULL, 10);
         if (options->regionSize < 2)
           options->regionSize = 2;
+        break;
+      case 'z': //sets the SyncToScreen rate.
+        cvalue = optarg;
+        int rate = strtol(cvalue, NULL, 10);
+        if (rate < 0)
+          rate = 0;
+        options->syncRate = rate;
         break;
       case 'l':
         if (strlen(optarg) <= MAX_FILENAME_LENGTH)

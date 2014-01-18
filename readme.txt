@@ -30,3 +30,4 @@ Command Line Arguments
 -h <number>   Sets the world height in cells.
 -r <number>   Sets the region size. This is for performance tuning, numbers less than 8 are generally best.
 -l <path>     Load a .life pattern file in to the simulator.
+-z <number>   Sets the number of times per second the world state is drawn to the screen.
