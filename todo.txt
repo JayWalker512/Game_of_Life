@@ -1,4 +1,5 @@
 Document to keep track of feature ideas and prioritization.
+-----------------------------------------------------------
 
 High:
 Output more useful information on term, gens/s, frames/s, generation, time elapsed.
@@ -6,6 +7,8 @@ Output more useful information on term, gens/s, frames/s, generation, time elaps
 C key should clear the world state.
 
 +/- key speeds/slows simulation.
+
+Toggleable - render active "regions" as other-colored squares behind the cells.
 
 Low:
 --help flag output explaining the various CLI flag options
