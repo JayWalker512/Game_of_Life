@@ -174,14 +174,8 @@ void ThreadLifeMain(void *worldContext)
     would be slower. Why do in two passes what we can in one? */
     /* These queues SHOULD be empty when we get back here, removing need to clear
     them. Perhaps there should be more error checking/robustness involved.*/
-    /* Do we even need to explicitly copy blocks that aren't being simulated? 
-    Won't they be the same anyway? */
     ClearDirtyRegionBuffer(context->backRegions, 0); //0 means copy, 1 means simulate
     BuildCopyAndSimBlockQueues(copyBlockQueue, simBlockQueue, context->frontRegions);
-
-    /* Copies blocks in front to back based on copyBlockQueue */
-    /*CopyWorldBlocksFromQueue(context->back, context->front, 
-        context->frontRegions, &copyBlockQueue);*/
     
     SimWorldBlocksFromQueue(context->back, context->backRegions, 
         context->front, context->frontRegions, simBlockQueue, 
@@ -194,42 +188,37 @@ void ThreadLifeMain(void *worldContext)
     //delay each simulation frame if necessary.
     SDL_Delay(context->generationDelayMs);
 
-    /*Quick an dirty way to pause simulation. 
+    /*Quick and dirty way to pause simulation. 
     Maybe there's a better way with semaphores or something that won't peg
     all the cores while doing nothing?*/
-    while (!context->bSimulating);
+    while (!context->bSimulating)
+      SDL_Delay(10);
 
-    /* Should these be atomic check/changes? If two threads see a randomize/reload request
-    and one locks, the other will wait to lock until the other finishes and then repeat
-    the same operation. Fine with one thread, not with more. */
+    SDL_LockMutex(context->lock);
     if (context->bRandomize)
     {
-      SDL_LockMutex(context->lock);
       context->bRandomize = 0;
       RandomizeWorldStateBinary(context); //this isn't a very good func name/setup...
       ClearDirtyRegionBuffer(context->frontRegions, 1);
-      SDL_UnlockMutex(context->lock);
     }
 
     if (context->bReloadFile)
     {
-      SDL_LockMutex(context->lock);
       context->bReloadFile = 0;
       ClearWorldBuffer(context->front, 0);
       LoadLifeWorld(context->front, context->lifeFile, 1);
       ClearDirtyRegionBuffer(context->frontRegions, 1);
-      SDL_UnlockMutex(context->lock);
     }
 
     if (context->bClearWorld)
     {
-      SDL_LockMutex(context->lock);
       context->bClearWorld = 0;
       ClearWorldBuffer(context->front, 0);
       ClearWorldBuffer(context->back, 0);
       ClearDirtyRegionBuffer(context->frontRegions, 1);
-      SDL_UnlockMutex(context->lock);
     }
+    SDL_UnlockMutex(context->lock);
+
   }
 
   DestroyStack(copyBlockQueue);
