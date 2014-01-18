@@ -217,6 +217,16 @@ void ThreadLifeMain(void *worldContext)
       ClearDirtyRegionBuffer(context->frontRegions, 1);
       SDL_UnlockMutex(context->lock);
     }
+
+    if (context->bClearWorld)
+    {
+      SDL_LockMutex(context->lock);
+      context->bClearWorld = 0;
+      ClearWorldBuffer(context->front, 0);
+      ClearWorldBuffer(context->back, 0);
+      ClearDirtyRegionBuffer(context->frontRegions, 1);
+      SDL_UnlockMutex(context->lock);
+    }
   }
 
   DestroyStack(copyBlockQueue);

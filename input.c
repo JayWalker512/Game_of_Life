@@ -258,6 +258,14 @@ char HandleInput(ThreadedLifeContext_t *worldContext,
     SDL_UnlockMutex(worldContext->lock);
   }
 
+  if (keys->c[0] && !keys->c[1])
+  {
+    //clear the world.
+    SDL_LockMutex(worldContext->lock);
+    worldContext->bClearWorld = 1;
+    SDL_UnlockMutex(worldContext->lock);
+  }
+
   if (keys->space[0] && !keys->space[1])
   {
     //pause the simulation or unpause it.

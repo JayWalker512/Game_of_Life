@@ -89,8 +89,6 @@ int main(int argc, char **argv)
   return 0;
 }
 
-
-
 char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
 {
   //set default options first, then parse for changes.

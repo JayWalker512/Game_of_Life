@@ -30,6 +30,7 @@ typedef struct ThreadedLifeContext_s {
 	char bRunning;
 	char bRandomize;
 	char bReloadFile;
+	char bClearWorld;
 	char bSimulating;
 } ThreadedLifeContext_t;
 
