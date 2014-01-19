@@ -27,6 +27,7 @@ typedef struct LifeArgOptions_s {
   int regionSize;
   char bFullScreen;
   char lifeFile[MAX_FILENAME_LENGTH];
+  int numThreads;
 } LifeArgOptions_t;
 
 static char ParseArgs(LifeArgOptions_t *options, int argc, char **argv);
@@ -42,7 +43,8 @@ int main(int argc, char **argv)
 
   ThreadedLifeContext_t *worldContext = 
     CreateThreadedLifeContext(options.worldWidth, options.worldHeight, 
-      &options.lifeRules, options.regionSize, 0, 1, options.lifeFile); //default block size of 8 for now
+      &options.lifeRules, options.regionSize, 0, 1, options.lifeFile, 
+      options.numThreads); //default block size of 8 for now
   if (worldContext == NULL)
   {
     printf("Failed to ThreadedLifeContext_t!\n");
@@ -57,13 +59,19 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  //create and start the simulation thread.
-  SDL_Thread *lifeThread = SDL_CreateThread((SDL_ThreadFunction)&ThreadLifeMain, 
-    "SimThread", worldContext);
-  if (lifeThread == NULL)
+  //create and start the simulation thread(s).
+  SDL_Thread *lifeThread[options.numThreads]; 
+  for (int i = 0; i < options.numThreads; i++)
   {
-    printf("Couldn't create thread!\n");
-    return 1;
+    char threadTitle[10] = "SimThread."; //. is the spot where our ID goes
+    threadTitle[9] = i + 65;
+    lifeThread[i] = SDL_CreateThread((SDL_ThreadFunction)&ThreadLifeMain, 
+      threadTitle, worldContext);
+    if (lifeThread[i] == NULL)
+    {
+      printf("Couldn't create thread!\n");
+      return 1;
+    }
   }
 
   InputDeviceValues_t keys;
@@ -80,7 +88,8 @@ int main(int argc, char **argv)
   }
 
   //cleaning up
-  SDL_WaitThread(lifeThread, NULL);
+  for (int i = 0; i < options.numThreads; i++)
+    SDL_WaitThread(lifeThread[i], NULL);
   DestroyThreadedLifeContext(worldContext);
   DestroyLifeGameGraphicsContext(graphicsContext);
   SDL_GL_DeleteContext(glContext);
@@ -103,10 +112,11 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
   options->lifeRules.birthMask = 8;
   options->lifeRules.survivalMask = 12;
   options->syncRate = 60;
+  options->numThreads = 1; //1 simulation thread. graphics/main thread is implied.
   char *cvalue = NULL;
 
   int c;
-  while ((c = getopt(argc, argv, "l:x:y:w:h:r:b:s:f:z:")) != -1 )
+  while ((c = getopt(argc, argv, "l:x:y:w:h:r:b:s:f:z:t:")) != -1 )
   {
     switch (c)
     {
@@ -149,6 +159,14 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
         if (rate < 0)
           rate = 0;
         options->syncRate = rate;
+        break;
+      case 't': //sets number of sim threads SPAWNED. 1 is minimum value to input here.
+        cvalue = optarg;
+        int threads = strtol(cvalue, NULL, 10);
+        threads -= 1; //ex. user inputs "2" for 2 total threads, but only 1 is a sim thread
+        if (threads < 1)
+          threads = 1;
+        options->numThreads = threads;
         break;
       case 'l':
         if (strlen(optarg) <= MAX_FILENAME_LENGTH)

@@ -54,7 +54,7 @@ char CheckInput(InputDeviceValues_t *keys)
   SDL_Event event;
   while (SDL_PollEvent(&event))
   {
-  	if (event.key.repeat == 0)
+  	if (event.key.repeat == 0) //uninitialized value? SDL bug?
     {
 	    if (event.type == SDL_QUIT)
 	    {

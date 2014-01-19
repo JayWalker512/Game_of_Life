@@ -10,14 +10,12 @@
 
 /* STATIC FUNCTIONS DECLARED AND DEFINED HERE! */
 
-static void BuildCopyAndSimBlockQueues(Stack_t *copyBlockQueue, Stack_t *simBlockQueue, DirtyRegionBuffer_t *dirtyRegions)
+static void BuildSimBlockQueues(Stack_t *simBlockQueue, DirtyRegionBuffer_t *dirtyRegions)
 {
   for (int i = 0; i < NumRegions(dirtyRegions); i++)
   {
     if (GetRegionValue(dirtyRegions, i))
       StackPush(simBlockQueue, i);
-    else
-      StackPush(copyBlockQueue, i);
   }
 }
 
@@ -154,29 +152,20 @@ static void SimWorldBlocksFromQueue(LifeWorldBuffer_t *back, DirtyRegionBuffer_t
 }
 
 /* PUBLIC FUNCTIONS BEGIN HERE */
-
+/*
 void ThreadLifeMain(void *worldContext)
 {
   ThreadedLifeContext_t *context = worldContext;
 
-  Stack_t *copyBlockQueue = NewStack(NumRegions(context->frontRegions));
   Stack_t *simBlockQueue = NewStack(NumRegions(context->frontRegions));
 
   unsigned long generations = 0;
   while (context->bRunning)
   {
-    /*Might need to implement a stack interface here. Would be less efficient
-    with more threads accessing concurrently? Could at least be used to build 
-    individual stacks for each thread. */
+    //essentially all the stuff below should only take place during a buffer swap
 
-    /*Analyzes block states in frontRegions and adds to relevant stacks based on
-    block states. This might be more sensical to divide into two functions, but 
-    would be slower. Why do in two passes what we can in one? */
-    /* These queues SHOULD be empty when we get back here, removing need to clear
-    them. Perhaps there should be more error checking/robustness involved.*/
     ClearDirtyRegionBuffer(context->backRegions, 0); //0 means copy, 1 means simulate
-    BuildCopyAndSimBlockQueues(copyBlockQueue, simBlockQueue, context->frontRegions);
-    
+    BuildSimBlockQueues(simBlockQueue, context->frontRegions);
     SimWorldBlocksFromQueue(context->back, context->backRegions, 
         context->front, context->frontRegions, simBlockQueue, 
         &context->lifeRules);
@@ -188,9 +177,6 @@ void ThreadLifeMain(void *worldContext)
     //delay each simulation frame if necessary.
     SDL_Delay(context->generationDelayMs);
 
-    /*Quick and dirty way to pause simulation. 
-    Maybe there's a better way with semaphores or something that won't peg
-    all the cores while doing nothing?*/
     while (!context->bSimulating)
       SDL_Delay(10);
 
@@ -221,12 +207,100 @@ void ThreadLifeMain(void *worldContext)
 
   }
 
-  DestroyStack(copyBlockQueue);
   DestroyStack(simBlockQueue);
+}
+*/
+
+void ThreadLifeMain(void *worldContext)
+{
+  ThreadedLifeContext_t *context = worldContext;
+
+  const int localQueueSize = 8;
+  Stack_t *localSimBlockQueue = NewStack(localQueueSize);
+
+  while (context->bRunning)
+  {
+    //fill work queue if available.
+    SDL_LockMutex(context->lock);
+    if (StackIsEmpty(context->simBlockQueue))
+    {
+      /*We could use a counter that each thread adds to when it completes its work.
+      When the counter reaches (numthreads - 1), we know that WE are the last 
+      thread to finish, and can sync/swap pointers.*/
+      
+      //we got here, stack is empty, we've completed our work!
+      //are we the last to finish?
+      //yes:
+      //  swap buffers, fill next queue
+      //no:
+      //  do nothing. locks+stack empty checks should take care of the rest.
+
+      context->numThreadsCompletedWork++; //XXX same thread can increment this multiple times?
+      if (context->numThreadsCompletedWork == context->numThreads)
+      {
+        SwapThreadedLifeContextGenerationPointers(context);
+
+        if (context->bRandomize)
+        {
+          context->bRandomize = 0;
+          RandomizeWorldStateBinary(context); //this isn't a very good func name/setup...
+          ClearDirtyRegionBuffer(context->frontRegions, 1);
+        }
+
+        if (context->bReloadFile)
+        {
+          context->bReloadFile = 0;
+          ClearWorldBuffer(context->front, 0);
+          LoadLifeWorld(context->front, context->lifeFile, 1);
+          ClearDirtyRegionBuffer(context->frontRegions, 1);
+        }
+
+        if (context->bClearWorld)
+        {
+          context->bClearWorld = 0;
+          ClearWorldBuffer(context->front, 0);
+          ClearWorldBuffer(context->back, 0);
+          ClearDirtyRegionBuffer(context->frontRegions, 1);
+        }
+
+        ClearDirtyRegionBuffer(context->backRegions, 0); //0 means null, 1 means simulate
+        BuildSimBlockQueues(context->simBlockQueue, context->frontRegions);
+
+        context->numThreadsCompletedWork = 0;
+      }
+    }
+    else
+    {
+      for (int i = 0; i < localQueueSize; i++)
+      {
+        if (!StackIsEmpty(context->simBlockQueue))
+        {
+          StackPush(localSimBlockQueue, StackPop(context->simBlockQueue));
+        }
+        else
+          i = localQueueSize;
+      }
+    }
+    //XXX: unlock SHOULD go here, but there's a race condition somewhere
+
+    if (!StackIsEmpty(localSimBlockQueue))
+    {
+      SimWorldBlocksFromQueue(context->back, context->backRegions, 
+        context->front, context->frontRegions, localSimBlockQueue, 
+        &context->lifeRules);
+    }
+    SDL_UnlockMutex(context->lock);
+
+    while (!context->bSimulating)
+      SDL_Delay(10);
+  }
+
+  DestroyStack(localSimBlockQueue);
 }
 
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
-    LifeRules_t *lifeRules, int regionSize, char bRandomize, char bSimulating, const char *lifeFile)
+    LifeRules_t *lifeRules, int regionSize, char bRandomize, char bSimulating, 
+    const char *lifeFile, int numThreads)
 {
   ThreadedLifeContext_t *context = malloc(sizeof(ThreadedLifeContext_t));
 
@@ -277,6 +351,11 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
 
   context->lifeRules.birthMask = lifeRules->birthMask;
   context->lifeRules.survivalMask = lifeRules->survivalMask;
+
+  context->simBlockQueue = NewStack(NumRegions(context->frontRegions));
+  BuildSimBlockQueues(context->simBlockQueue, context->frontRegions);
+  context->numThreads = numThreads;
+  context->numThreadsCompletedWork = 0;
  
   context->generationDelayMs = 0;
   context->bReloadFile = 0;
@@ -294,6 +373,7 @@ void DestroyThreadedLifeContext(ThreadedLifeContext_t *context)
   DestroyLifeWorld(context->back);
   DestroyDirtyRegionBuffer(context->frontRegions);
   DestroyDirtyRegionBuffer(context->backRegions);
+  DestroyStack(context->simBlockQueue);
   SDL_DestroyMutex(context->lock);
   free(context);
 }
@@ -469,38 +549,6 @@ LifeWorldCell_t SetWorldState(LifeWorldBuffer_t *world, LifeWorldCell_t state)
     }
   }
   return state;
-}
-
-void LifeGeneration(LifeWorldBuffer_t *newWorld, LifeWorldBuffer_t *const oldWorld)
-{
-  SetWorldState(newWorld, 0); //initialize newWorld before we simulate
-
-  LifeWorldDim_t x = 0;
-  LifeWorldDim_t y = 0;
-  for (y = 0; y < oldWorld->height; y++)
-  {
-    for (x = 0; x < oldWorld->width; x++)
-    {
-      char numNeighbors = NumLiveNeighbors(x, y, oldWorld);
-      char cellIsLiving = GetCellState(x, y, oldWorld);
-      if (cellIsLiving)
-      {
-        if (numNeighbors >= 2 && numNeighbors <= 3)
-        {
-          SetCellState(x, y, newWorld, 1); //cell was alive, stays alive
-        } 
-        else if (numNeighbors < 2 || numNeighbors > 3)
-        {
-          SetCellState(x, y, newWorld, 0); //cell was alive, dies
-        }
-      }
-      
-      if (!cellIsLiving && numNeighbors == 3) //cell was dead and has 3 live neighbors
-      {
-        SetCellState(x,y,newWorld,1); //living cell is born
-      }
-    }
-  }
 }
 
 unsigned long DoGensPerSec(unsigned long gens)

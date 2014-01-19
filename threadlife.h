@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <stdint.h>
 #include "dirtyregion.h"
+#include "stack.h"
 
 typedef char LifeWorldCell_t;
 typedef long LifeWorldDim_t;
@@ -25,7 +26,6 @@ typedef struct ThreadedLifeContext_s {
 	LifeWorldBuffer_t *back;
 	DirtyRegionBuffer_t *frontRegions;
 	DirtyRegionBuffer_t *backRegions;
-	SDL_mutex *lock;
 	LifeRules_t lifeRules;
 	int generationDelayMs;
 	char bRunning;
@@ -33,11 +33,18 @@ typedef struct ThreadedLifeContext_s {
 	char bReloadFile;
 	char bClearWorld;
 	char bSimulating;
+
+	//threading
+	Stack_t *simBlockQueue;
+	int numThreads;
+	int numThreadsCompletedWork;
+	SDL_mutex *lock;
 } ThreadedLifeContext_t;
 
 void ThreadLifeMain(void *worldContext);
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
-		LifeRules_t *lifeRules, int regionSize, char bRandomize, char bSimulating, const char *lifeFile); //pass "" or otherwise NULL to lifeFile to ignore argument.
+		LifeRules_t *lifeRules, int regionSize, char bRandomize, char bSimulating, 
+		const char *lifeFile, int numThreads); //pass "" or otherwise NULL to lifeFile to ignore argument.
 void DestroyThreadedLifeContext(ThreadedLifeContext_t *context);
 LifeWorldBuffer_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height);
 void DestroyLifeWorld(LifeWorldBuffer_t *world);
