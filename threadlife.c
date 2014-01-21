@@ -177,6 +177,31 @@ void ThreadLifeMain(void *worldContext)
 		{
 			SwapThreadedLifeContextGenerationPointers(context);
 			ClearDirtyRegionBuffer(context->backRegions, 0); //0 means null, 1 means simulate
+
+			//any changes to world state go here before building the work queue
+			if (context->bRandomize)
+			{
+				context->bRandomize = 0;
+				RandomizeWorldStateBinary(context); //this isn't a very good func name/setup...
+				ClearDirtyRegionBuffer(context->frontRegions, 1);
+			}
+
+			if (context->bReloadFile)
+			{
+				context->bReloadFile = 0;
+				ClearWorldBuffer(context->front, 0);
+				LoadLifeWorld(context->front, context->lifeFile, 1);
+				ClearDirtyRegionBuffer(context->frontRegions, 1);
+			}
+
+			/*if (context->bClearWorld)
+			{
+				context->bClearWorld = 0;
+				ClearWorldBuffer(context->front, 0);
+				ClearWorldBuffer(context->back, 0);
+				ClearDirtyRegionBuffer(context->frontRegions, 1);
+			}*/
+
       BuildSimBlockQueues(context->simBlockQueue, context->frontRegions);
 		}
 	
