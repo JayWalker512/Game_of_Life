@@ -37,7 +37,7 @@ typedef struct ThreadedLifeContext_s {
 	//threading
 	Stack_t *simBlockQueue;
 	int numThreads;
-	int numThreadsCompletedWork;
+	int numThreadsWorking;
 	SDL_mutex *lock;
 } ThreadedLifeContext_t;
 

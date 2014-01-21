@@ -210,7 +210,7 @@ void ThreadLifeMain(void *worldContext)
   DestroyStack(simBlockQueue);
 }
 */
-
+/*
 void ThreadLifeMain(void *worldContext)
 {
   ThreadedLifeContext_t *context = worldContext;
@@ -224,9 +224,9 @@ void ThreadLifeMain(void *worldContext)
     SDL_LockMutex(context->lock);
     if (StackIsEmpty(context->simBlockQueue))
     {
-      /*We could use a counter that each thread adds to when it completes its work.
-      When the counter reaches (numthreads - 1), we know that WE are the last 
-      thread to finish, and can sync/swap pointers.*/
+      //We could use a counter that each thread adds to when it completes its work.
+      //When the counter reaches (numthreads - 1), we know that WE are the last 
+      //thread to finish, and can sync/swap pointers.
       
       //we got here, stack is empty, we've completed our work!
       //are we the last to finish?
@@ -297,6 +297,58 @@ void ThreadLifeMain(void *worldContext)
 
   DestroyStack(localSimBlockQueue);
 }
+*/
+
+void ThreadLifeMain(void *worldContext)
+{
+  ThreadedLifeContext_t *context = worldContext;
+
+  const int localQueueSize = 16;
+	int bGotWork = 0;
+  Stack_t *localSimBlockQueue = NewStack(localQueueSize);
+
+  while (context->bRunning)
+  {
+		SDL_LockMutex(context->lock);
+		if (bGotWork == 1)
+		{
+			bGotWork = 0;
+			context->numThreadsWorking--;
+		}
+
+		if (bGotWork == 0 &&
+				context->numThreadsWorking == 0 && 
+				StackIsEmpty(context->simBlockQueue))
+		{
+			SwapThreadedLifeContextGenerationPointers(context);
+			ClearDirtyRegionBuffer(context->backRegions, 0); //0 means null, 1 means simulate
+      BuildSimBlockQueues(context->simBlockQueue, context->frontRegions);
+		}
+	
+		int jobsPulled = 0;
+		while (jobsPulled < localQueueSize && !StackIsEmpty(context->simBlockQueue))
+		{
+			StackPush(localSimBlockQueue, StackPop(context->simBlockQueue));
+			jobsPulled++;
+			bGotWork = 1;
+		}
+		if (!StackIsEmpty(localSimBlockQueue))
+			context->numThreadsWorking++;
+
+		jobsPulled = 0; //just to make sure it's reinitialized. It never goes out of scope so once set will stay, right?
+		SDL_UnlockMutex(context->lock);
+
+		if (!StackIsEmpty(localSimBlockQueue))
+    {
+      SimWorldBlocksFromQueue(context->back, context->backRegions, 
+        context->front, context->frontRegions, localSimBlockQueue, 
+        &context->lifeRules);
+    }
+	}
+	DestroyStack(localSimBlockQueue);
+}	
+
+
 
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
     LifeRules_t *lifeRules, int regionSize, char bRandomize, char bSimulating, 
@@ -355,7 +407,7 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
   context->simBlockQueue = NewStack(NumRegions(context->frontRegions));
   BuildSimBlockQueues(context->simBlockQueue, context->frontRegions);
   context->numThreads = numThreads;
-  context->numThreadsCompletedWork = 0;
+  context->numThreadsWorking = 0;
  
   context->generationDelayMs = 0;
   context->bReloadFile = 0;
