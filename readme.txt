@@ -28,6 +28,6 @@ Command Line Arguments
 -y <number>   Sets the window height in pixels.
 -w <number>   Sets the world width in cells.
 -h <number>   Sets the world height in cells.
--r <number>   Sets the region size. This is for performance tuning, numbers less than 8 are generally best.
+-r <number>   Sets the region size. This is for performance tuning, numbers less than 8 are generally best. NOTE: The world width and height are automatically scaled up to become multiples of this number. This will change the simulation result when playing in a toroidal world. DEFAULT value is 4, so world dimensions will be scaled up to become divisible by 4 if this parameter is not changed.
 -l <path>     Load a .life pattern file in to the simulator.
 -z <number>   Sets the number of times per second the world state is drawn to the screen.
