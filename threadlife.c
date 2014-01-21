@@ -157,7 +157,7 @@ void ThreadLifeMain(void *worldContext)
 {
   ThreadedLifeContext_t *context = worldContext;
 
-  const int localQueueSize = 16;
+  const int localQueueSize = 32;
 	int bGotWork = 0;
   Stack_t *localSimBlockQueue = NewStack(localQueueSize);
 
