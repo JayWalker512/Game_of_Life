@@ -98,12 +98,6 @@ void DrawRegionsEnabled(LifeGameGraphicsContext_t *context, int enabled)
     context->bDrawRegions = 0;
 }
 
-/* static to-be*/ 
-void DrawGame(SDL_Window *window, LifeGameGraphicsContext_t *context)
-{
-
-}
-
 void SyncWorldToScreen(SDL_Window *window, ThreadedLifeContext_t *worldContext, LifeGameGraphicsContext_t *graphicsContext, int syncRateHz)
 {
   static unsigned long endTime = 0;

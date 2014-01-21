@@ -33,7 +33,7 @@ static void CopyWorldBlock(LifeWorldBuffer_t *dest, LifeWorldBuffer_t *src, int 
     }
   }
 }
-
+/*
 static int CopyWorldBlocksFromQueue(LifeWorldBuffer_t *front, LifeWorldBuffer_t *back, 
   DirtyRegionBuffer_t * const dirtyRegionsReference, Stack_t *copyBlockQueue)
 {
@@ -51,7 +51,8 @@ static int CopyWorldBlocksFromQueue(LifeWorldBuffer_t *front, LifeWorldBuffer_t 
   }
   return blocksCopied;
 }
-
+*/
+/*
 static void ClearWorldBlock(LifeWorldBuffer_t *world, LifeWorldDim_t x, LifeWorldDim_t y,
   LifeWorldDim_t w, LifeWorldDim_t h, LifeWorldCell_t state)
 {
@@ -63,7 +64,7 @@ static void ClearWorldBlock(LifeWorldBuffer_t *world, LifeWorldDim_t x, LifeWorl
     }
   }
 }
-
+*/
 static void MarkAffectedRegions(LifeWorldDim_t x, LifeWorldDim_t y, DirtyRegionBuffer_t *dirtyBuffer)
 {
   MarkRegion(dirtyBuffer, x, y, 1);

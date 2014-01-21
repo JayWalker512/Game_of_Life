@@ -27,7 +27,6 @@ void SetCellDrawColor(LifeGameGraphicsContext_t *context, Vector3_t *const rgb);
 void SetRegionDrawColor(LifeGameGraphicsContext_t *context, Vector3_t *const rgb);
 void SetBackgroundDrawColor(LifeGameGraphicsContext_t *context, Vector3_t *const rgb);
 void DrawRegionsEnabled(LifeGameGraphicsContext_t *context, int enabled);
-/* static to-be*/ void DrawGame(SDL_Window *window, LifeGameGraphicsContext_t *context);
 
 void DrawWorld(SDL_Window *window, LifeGameGraphicsContext_t *graphicsContext);
 
