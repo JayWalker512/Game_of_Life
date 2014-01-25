@@ -200,6 +200,7 @@ void ThreadLifeMain(void *worldContext)
 				ClearWorldBuffer(context->front, 0);
 				ClearWorldBuffer(context->back, 0);
 				ClearDirtyRegionBuffer(context->frontRegions, 1);
+				ClearDirtyRegionBuffer(context->frontRegions, 0);
 			}*/
 
       BuildSimBlockQueues(context->simBlockQueue, context->frontRegions);
@@ -272,7 +273,7 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
   {
     if (LoadLifeWorld(context->front, lifeFile, 1) == 0)
     {
-      printf("Failed to load file!\n");
+      printf("Failed to load life file for ThreadedLifeContext!\n");
     } 
     else
     {

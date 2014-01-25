@@ -31,6 +31,7 @@ typedef struct LifeArgOptions_s {
 } LifeArgOptions_t;
 
 static char ParseArgs(LifeArgOptions_t *options, int argc, char **argv);
+static void PrintSimOptions(LifeArgOptions_t * const options, ThreadedLifeContext_t *context);
 
 int main(int argc, char **argv)
 {
@@ -50,6 +51,8 @@ int main(int argc, char **argv)
     printf("Failed to ThreadedLifeContext_t!\n");
     return 1;
   }
+	else
+		PrintSimOptions(&options, worldContext);
 
   LifeGameGraphicsContext_t *graphicsContext = 
     CreateLifeGameGraphicsContext(worldContext);
@@ -189,4 +192,20 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
     }
   }
   return 1;
+}
+
+static void PrintSimOptions(LifeArgOptions_t * const options, ThreadedLifeContext_t *context)
+{
+	printf("Options:\n");
+	if (options->bFullScreen)
+		printf("Window: %dx%d Fullscreen\n", options->resX, options->resY);
+	else
+		printf("Window: %dx%d\n", options->resX, options->resY);
+
+	printf("World size: %dx%d\n", (int)context->front->width, (int)context->front->height);
+	printf("Region size: %d\n", options->regionSize);
+	printf("Sync rate: %d\n", options->syncRate);
+	printf("Threads: %d\n", options->numThreads + 1);
+	if (context->lifeFile[0] != '\0')
+		printf("Loaded file: %s\n", context->lifeFile);
 }

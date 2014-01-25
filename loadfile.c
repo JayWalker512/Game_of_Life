@@ -8,7 +8,10 @@ char LoadLifeWorld(LifeWorldBuffer_t *dest, const char *file, char bCenter)
 	fp = fopen(file, "r");
 
 	if (fp == NULL)
+	{
+		printf("Couldn't open: %s\n", file);
 		return 0;
+	}
 
 	LifeWorldDim_t x, y;
 	if (bCenter == 1)
@@ -23,7 +26,7 @@ char LoadLifeWorld(LifeWorldBuffer_t *dest, const char *file, char bCenter)
 	}
 
 	int c = 0;
-	puts("Loading file:");
+	printf("Loading file: %s\n", file);
 	while ((c = fgetc(fp)) != EOF)
 	{
 		switch ( c )
