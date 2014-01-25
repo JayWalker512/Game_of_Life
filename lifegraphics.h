@@ -5,7 +5,11 @@
 #include "threadlife.h"
 #include "vector3.h"
 
-//this should become opaque
+typedef struct GraphicsStats_s {
+	long frames;
+	long fps;
+} GraphicsStats_t;
+
 typedef struct LifeGameGraphicsContext_s {
 	LifeWorldBuffer_t *pWorldRenderBuffer;
 	LifeWorldBuffer_t *pRegionRenderBuffer;

@@ -20,6 +20,11 @@ typedef struct LifeRules_s {
 	int survivalMask;
 } LifeRules_t;
 
+typedef struct LifeStats_s {
+	long generation;
+	long gensPerSec;
+} LifeStats_t;
+
 typedef struct ThreadedLifeContext_s {
 	char *lifeFile;
 	LifeWorldBuffer_t *front;
