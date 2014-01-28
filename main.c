@@ -125,7 +125,7 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
   char *cvalue = NULL;
 
   int c;
-  while ((c = getopt(argc, argv, "l:x:y:w:h:r:b:s:f:z:t:")) != -1 )
+  while ((c = getopt(argc, argv, "l:x:y:w:h:r:b:s:z:t:f")) != -1 )
   {
     switch (c)
     {
