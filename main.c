@@ -32,6 +32,7 @@ typedef struct LifeArgOptions_s {
 
 static char ParseArgs(LifeArgOptions_t *options, int argc, char **argv);
 static void PrintSimOptions(LifeArgOptions_t * const options, ThreadedLifeContext_t *context);
+static void PrintStatsOncePerSecond(GraphicsStats_t *graphicsStats);
 
 int main(int argc, char **argv)
 {
@@ -79,15 +80,20 @@ int main(int argc, char **argv)
 
   InputDeviceValues_t keys;
   InitializeKeyPresses(&keys);
+  GraphicsStats_t graphicsStats;
+  InitializeGraphicsStats(&graphicsStats);
+  UpdateGraphicsStats(&graphicsStats); //to avoid printing FPS: 0 twice
   //we start this loop in main thread that only does rendering and input
   while (worldContext->bRunning)
   {
     //Draw world so we can see initial state. 
-    SyncWorldToScreen(window, worldContext, graphicsContext, options.syncRate);
+    if(SyncWorldToScreen(window, worldContext, graphicsContext, options.syncRate))
+      UpdateGraphicsStats(&graphicsStats);
 
     //input handling
     CheckInput(&keys);
     HandleInput(worldContext, graphicsContext, &keys);
+    PrintStatsOncePerSecond(&graphicsStats);
   }
 
   //cleaning up
@@ -208,4 +214,17 @@ static void PrintSimOptions(LifeArgOptions_t * const options, ThreadedLifeContex
 	printf("Threads: %d\n", options->numThreads + 1);
 	if (context->lifeFile[0] != '\0')
 		printf("Loaded file: %s\n", context->lifeFile);
+}
+
+static void PrintStatsOncePerSecond(GraphicsStats_t *graphicsStats)
+{
+  static long endTime = 0;
+  long now = SDL_GetTicks();
+  if (now > endTime)
+  {
+    //do per-second stuff here
+    printf("FPS: %ld\n", graphicsStats->fps);
+
+    endTime = now + 1000;
+  }
 }

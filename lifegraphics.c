@@ -98,10 +98,12 @@ void DrawRegionsEnabled(LifeGameGraphicsContext_t *context, int enabled)
     context->bDrawRegions = 0;
 }
 
-void SyncWorldToScreen(SDL_Window *window, ThreadedLifeContext_t *worldContext, LifeGameGraphicsContext_t *graphicsContext, int syncRateHz)
+int SyncWorldToScreen(SDL_Window *window, ThreadedLifeContext_t *worldContext, LifeGameGraphicsContext_t *graphicsContext, 
+  int syncRateHz)
 {
+  int bDidSync = 0;
   static unsigned long endTime = 0;
-  if (SDL_GetTicks() > endTime)
+  if (SDL_GetTicks() >= endTime)
   {
 		//Critical section!
     SDL_LockMutex(worldContext->lock);
@@ -110,6 +112,7 @@ void SyncWorldToScreen(SDL_Window *window, ThreadedLifeContext_t *worldContext, 
 		//end crititcal section!
 
     DrawWorld(window, graphicsContext);
+    bDidSync = 1;
 
 		if (syncRateHz > 0)
 		{
@@ -117,7 +120,7 @@ void SyncWorldToScreen(SDL_Window *window, ThreadedLifeContext_t *worldContext, 
     	endTime = SDL_GetTicks() + delayMs;
 		}
   }
-
+  return bDidSync;
 }
 
 void DrawWorld(SDL_Window *window, LifeGameGraphicsContext_t *graphicsContext)
@@ -167,4 +170,23 @@ void DrawWorld(SDL_Window *window, LifeGameGraphicsContext_t *graphicsContext)
   DrawQuadData(graphicsContext->pCellDrawData);
   ClearQuadDrawData(graphicsContext->pCellDrawData);
   SDL_GL_SwapWindow(window);
+}
+
+void InitializeGraphicsStats(GraphicsStats_t *graphicsStats)
+{
+  graphicsStats->endTime = 0;
+  graphicsStats->frames = 0;
+  graphicsStats->fps = 0;
+}
+
+void UpdateGraphicsStats(GraphicsStats_t *graphicsStats)
+{
+  long now = SDL_GetTicks();
+  if (now >= graphicsStats->endTime)
+  {
+    graphicsStats->fps = graphicsStats->frames;
+    graphicsStats->frames = 0;
+    graphicsStats->endTime = now + 1000;
+  }
+  graphicsStats->frames++;
 }

@@ -229,8 +229,6 @@ void ThreadLifeMain(void *worldContext)
 	DestroyStack(localSimBlockQueue);
 }	
 
-
-
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
     LifeRules_t *lifeRules, int regionSize, char bRandomize, char bSimulating, 
     const char *lifeFile, int numThreads)

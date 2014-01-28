@@ -6,6 +6,7 @@
 #include "vector3.h"
 
 typedef struct GraphicsStats_s {
+	long endTime;
 	long frames;
 	long fps;
 } GraphicsStats_t;
@@ -34,9 +35,12 @@ void DrawRegionsEnabled(LifeGameGraphicsContext_t *context, int enabled);
 
 void DrawWorld(SDL_Window *window, LifeGameGraphicsContext_t *graphicsContext);
 
-void SyncWorldToScreen(SDL_Window *window, 
+int SyncWorldToScreen(SDL_Window *window, 
 	ThreadedLifeContext_t *worldContext, 
 	LifeGameGraphicsContext_t *graphicsContext,
-	int syncRateHz);
+	int syncRateHz); //returns 1 if world was synced, 0 otherwise.
+
+void InitializeGraphicsStats(GraphicsStats_t *graphicsStats);
+void UpdateGraphicsStats(GraphicsStats_t *graphicsStats); //to be called once per frame
 
 #endif
