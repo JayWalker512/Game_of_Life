@@ -312,7 +312,10 @@ char HandleInput(ThreadedLifeContext_t *worldContext,
     GetGameGraphicsScale(&currentScale, graphicsContext);
     Vector3_t newScale;
     Vector3Add(&newScale, &currentScale, &scaleModifier);
-    SetGameGraphicsScale(graphicsContext, &newScale);
+
+    //limit zoom levels
+   	if (newScale.x >= 1.0f && newScale.x <= 10.0f)
+    	SetGameGraphicsScale(graphicsContext, &newScale);
   }
 
   if (keys->leftClick[0]) //key down at all
