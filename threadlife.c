@@ -152,6 +152,30 @@ static void SimWorldBlocksFromQueue(LifeWorldBuffer_t *back, DirtyRegionBuffer_t
   }
 }
 
+static void InitializeLifeStats(ThreadedLifeContext_t *context)
+{
+	context->lifeStats.totalGenerations = 0;
+	context->lifeStats.endTime = 0;
+	context->lifeStats.generationsThisSecond = 0;
+	context->lifeStats.gensPerSec = 0;
+}
+
+//to be called ONCE PER GENERATION when the world buffer is flipped
+static void UpdateLifeStats(ThreadedLifeContext_t *context)
+{
+	SDL_LockMutex(context->statLock);
+	long now = SDL_GetTicks();
+  if (now >= context->lifeStats.endTime)
+  {
+    context->lifeStats.gensPerSec = context->lifeStats.generationsThisSecond;
+		context->lifeStats.generationsThisSecond = 0;
+    context->lifeStats.endTime = now + 1000;
+  }
+  context->lifeStats.totalGenerations++;
+	context->lifeStats.generationsThisSecond++;
+	SDL_UnlockMutex(context->statLock);
+}
+
 /* PUBLIC FUNCTIONS BEGIN HERE */
 
 void ThreadLifeMain(void *worldContext)
@@ -175,6 +199,8 @@ void ThreadLifeMain(void *worldContext)
 				context->numThreadsWorking == 0 && 
 				StackIsEmpty(context->simBlockQueue))
 		{
+			//if we're swapping, that's a generation! Update stats:
+			UpdateLifeStats(context);
 			SwapThreadedLifeContextGenerationPointers(context);
 			ClearDirtyRegionBuffer(context->backRegions, 0); //0 means null, 1 means simulate
 
@@ -233,6 +259,7 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
     LifeRules_t *lifeRules, int regionSize, char bRandomize, char bSimulating, 
     const char *lifeFile, int numThreads)
 {
+	/* This function could stand some cleaning up and commenting. */
   ThreadedLifeContext_t *context = malloc(sizeof(ThreadedLifeContext_t));
 
   LifeWorldDim_t scaledWidth = w;
@@ -261,6 +288,15 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
     DestroyThreadedLifeContext(context);
     return NULL;
   }
+
+	context->statLock = SDL_CreateMutex();
+	if (!context->statLock)
+  {
+    printf("Failed to create ThreadedLifeContext.statLock!\n");
+    DestroyThreadedLifeContext(context);
+    return NULL;
+  }
+	InitializeLifeStats(context);
 
   if (bRandomize)
     RandomizeWorldStateBinary(context);
@@ -482,14 +518,10 @@ LifeWorldCell_t SetWorldState(LifeWorldBuffer_t *world, LifeWorldCell_t state)
   return state;
 }
 
-unsigned long DoGensPerSec(unsigned long gens)
+void GetLifeStats(long *generation, long *gensPerSec, ThreadedLifeContext_t *context)
 {
-  static unsigned long endTime = 0;
-  if (SDL_GetTicks() > endTime)
-  {
-    endTime = SDL_GetTicks() + 1000;
-    printf("Gens/s: %ld\n", gens);
-    return 0;
-  }
-  return ++gens;
+	SDL_LockMutex(context->statLock);
+	*generation = context->lifeStats.totalGenerations;
+	*gensPerSec = context->lifeStats.gensPerSec;
+	SDL_UnlockMutex(context->statLock);
 }

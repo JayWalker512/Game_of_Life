@@ -21,7 +21,9 @@ typedef struct LifeRules_s {
 } LifeRules_t;
 
 typedef struct LifeStats_s {
-	long generation;
+	long totalGenerations;
+	long endTime;
+	long generationsThisSecond;
 	long gensPerSec;
 } LifeStats_t;
 
@@ -44,6 +46,10 @@ typedef struct ThreadedLifeContext_s {
 	int numThreads;
 	int numThreadsWorking;
 	SDL_mutex *lock;
+
+	//stats 
+	LifeStats_t lifeStats;
+	SDL_mutex *statLock;
 } ThreadedLifeContext_t;
 
 void ThreadLifeMain(void *worldContext);
@@ -70,5 +76,6 @@ void RandomizeWorldStateBinary(ThreadedLifeContext_t *worldContext);
 char NumLiveNeighbors(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *world);
 void LifeGeneration(LifeWorldBuffer_t *newWorld, LifeWorldBuffer_t *const oldWorld);
 unsigned long DoGensPerSec(unsigned long gens);
+void GetLifeStats(long *generation, long *gensPerSec, ThreadedLifeContext_t *context);
 
 #endif

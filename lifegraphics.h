@@ -11,6 +11,7 @@ typedef struct GraphicsStats_s {
 	long fps;
 } GraphicsStats_t;
 
+//should stats var be contained in this struct since it's relevant to context?
 typedef struct LifeGameGraphicsContext_s {
 	LifeWorldBuffer_t *pWorldRenderBuffer;
 	LifeWorldBuffer_t *pRegionRenderBuffer;
@@ -40,6 +41,7 @@ int SyncWorldToScreen(SDL_Window *window,
 	LifeGameGraphicsContext_t *graphicsContext,
 	int syncRateHz); //returns 1 if world was synced, 0 otherwise.
 
+//the init function here could be private (read: static in lifegraphics.c no?)
 void InitializeGraphicsStats(GraphicsStats_t *graphicsStats);
 void UpdateGraphicsStats(GraphicsStats_t *graphicsStats); //to be called once per frame
 

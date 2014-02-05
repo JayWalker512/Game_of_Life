@@ -32,7 +32,7 @@ typedef struct LifeArgOptions_s {
 
 static char ParseArgs(LifeArgOptions_t *options, int argc, char **argv);
 static void PrintSimOptions(LifeArgOptions_t * const options, ThreadedLifeContext_t *context);
-static void PrintStatsOncePerSecond(GraphicsStats_t *graphicsStats);
+static void PrintStatsOncePerSecond(GraphicsStats_t *graphicsStats, ThreadedLifeContext_t *lifeContext);
 
 int main(int argc, char **argv)
 {
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
     //input handling
     CheckInput(&keys);
     HandleInput(worldContext, graphicsContext, &keys);
-    PrintStatsOncePerSecond(&graphicsStats);
+    PrintStatsOncePerSecond(&graphicsStats, worldContext);
   }
 
   //cleaning up
@@ -216,15 +216,18 @@ static void PrintSimOptions(LifeArgOptions_t * const options, ThreadedLifeContex
 		printf("Loaded file: %s\n", context->lifeFile);
 }
 
-static void PrintStatsOncePerSecond(GraphicsStats_t *graphicsStats)
+static void PrintStatsOncePerSecond(GraphicsStats_t *graphicsStats, ThreadedLifeContext_t *lifeContext)
 {
   static long endTime = 0;
   long now = SDL_GetTicks();
   if (now > endTime)
   {
+		endTime = now + 1000;
+		long gensPerSec, generation = 0;
+		GetLifeStats(&generation, &gensPerSec, lifeContext);
     //do per-second stuff here
-    printf("FPS: %ld\n", graphicsStats->fps);
+    printf("Frames/s: %ld, Gens/s: %ld, Generation: %ld\n", 
+			graphicsStats->fps, gensPerSec, generation);
 
-    endTime = now + 1000;
   }
 }
