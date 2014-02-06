@@ -35,6 +35,7 @@ typedef struct ThreadedLifeContext_s {
 	DirtyRegionBuffer_t *backRegions;
 	LifeRules_t lifeRules;
 	int generationDelayMs;
+	long terminationGeneration;
 	char bRunning;
 	char bRandomize;
 	char bReloadFile;
@@ -53,9 +54,11 @@ typedef struct ThreadedLifeContext_s {
 } ThreadedLifeContext_t;
 
 void ThreadLifeMain(void *worldContext);
+
+//This func has an awful lot of sparse params, maybe combine in a "ThreadLifeContextOptions" struct?
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
 		LifeRules_t *lifeRules, int regionSize, char bRandomize, char bSimulating, 
-		const char *lifeFile, int numThreads); //pass "" or otherwise NULL to lifeFile to ignore argument.
+		const char *lifeFile, int numThreads, long terminationGeneration); //pass "" or otherwise NULL to lifeFile to ignore argument. terminationGeneration = -1 for never-ending
 void DestroyThreadedLifeContext(ThreadedLifeContext_t *context);
 LifeWorldBuffer_t *NewLifeWorld(LifeWorldDim_t width, LifeWorldDim_t height);
 void DestroyLifeWorld(LifeWorldBuffer_t *world);

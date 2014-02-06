@@ -28,6 +28,7 @@ typedef struct LifeArgOptions_s {
   char bFullScreen;
   char lifeFile[MAX_FILENAME_LENGTH];
   int numThreads;
+	long terminationGeneration;
 } LifeArgOptions_t;
 
 static char ParseArgs(LifeArgOptions_t *options, int argc, char **argv);
@@ -46,7 +47,7 @@ int main(int argc, char **argv)
   ThreadedLifeContext_t *worldContext = 
     CreateThreadedLifeContext(options.worldWidth, options.worldHeight, 
       &options.lifeRules, options.regionSize, 0, 1, options.lifeFile, 
-      options.numThreads); //default block size of 8 for now
+      options.numThreads, options.terminationGeneration); //default block size of 8 for now
   if (worldContext == NULL)
   {
     printf("Failed to ThreadedLifeContext_t!\n");
@@ -122,10 +123,11 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
   options->lifeRules.survivalMask = 12;
   options->syncRate = 60;
   options->numThreads = 1; //1 simulation thread. graphics/main thread is implied.
+	options->terminationGeneration = -1;
   char *cvalue = NULL;
 
   int c;
-  while ((c = getopt(argc, argv, "l:x:y:w:h:r:b:s:z:t:f")) != -1 )
+  while ((c = getopt(argc, argv, "l:x:y:w:h:r:b:s:z:t:g:f")) != -1 )
   {
     switch (c)
     {
@@ -162,6 +164,10 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
         if (options->regionSize < 2)
           options->regionSize = 2;
         break;
+			case 'g':
+        cvalue = optarg;
+        options->terminationGeneration = strtol(cvalue, NULL, 10);
+				//negative values here won't break anything, so no reason to check. Maybe use unsigned val and make 0 the unlimited marker?
       case 'z': //sets the SyncToScreen rate.
         cvalue = optarg;
         int rate = strtol(cvalue, NULL, 10);

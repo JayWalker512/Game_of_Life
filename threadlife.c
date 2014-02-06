@@ -204,6 +204,9 @@ void ThreadLifeMain(void *worldContext)
 			SwapThreadedLifeContextGenerationPointers(context);
 			ClearDirtyRegionBuffer(context->backRegions, 0); //0 means null, 1 means simulate
 
+			if (context->lifeStats.totalGenerations == context->terminationGeneration)
+				context->bRunning = 0;
+
 			//any changes to world state go here before building the work queue
 			if (context->bRandomize)
 			{
@@ -257,7 +260,7 @@ void ThreadLifeMain(void *worldContext)
 
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,
     LifeRules_t *lifeRules, int regionSize, char bRandomize, char bSimulating, 
-    const char *lifeFile, int numThreads)
+    const char *lifeFile, int numThreads, long terminationGeneration)
 {
 	/* This function could stand some cleaning up and commenting. */
   ThreadedLifeContext_t *context = malloc(sizeof(ThreadedLifeContext_t));
@@ -325,6 +328,7 @@ ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_
   context->numThreadsWorking = 0;
  
   context->generationDelayMs = 0;
+	context->terminationGeneration = terminationGeneration;
   context->bReloadFile = 0;
   context->bClearWorld = 0;
   context->bRandomize = 0; //we only want to randomize once from here or not at all
