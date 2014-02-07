@@ -27,6 +27,7 @@ typedef struct LifeArgOptions_s {
   int regionSize;
   char bFullScreen;
   char lifeFile[MAX_FILENAME_LENGTH];
+  char outputFile[MAX_FILENAME_LENGTH];
   int numThreads;
 	long terminationGeneration;
 } LifeArgOptions_t;
@@ -96,10 +97,13 @@ int main(int argc, char **argv)
     HandleInput(worldContext, graphicsContext, &keys);
     PrintStatsOncePerSecond(&graphicsStats, worldContext);
   }
-
   //cleaning up
   for (int i = 0; i < options.numThreads; i++)
     SDL_WaitThread(lifeThread[i], NULL);
+
+  if (options.outputFile[0] != '\0')
+    SaveLifeWorld(options.outputFile, worldContext->front);
+
   DestroyThreadedLifeContext(worldContext);
   DestroyLifeGameGraphicsContext(graphicsContext);
   SDL_GL_DeleteContext(glContext);
@@ -119,6 +123,7 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
   options->resX = 1024;
   options->resY = 768;
   options->lifeFile[0] = '\0';
+  options->outputFile[0] = '\0';
   options->lifeRules.birthMask = 8;
   options->lifeRules.survivalMask = 12;
   options->syncRate = 60;
@@ -127,7 +132,7 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
   char *cvalue = NULL;
 
   int c;
-  while ((c = getopt(argc, argv, "l:x:y:w:h:r:b:s:z:t:g:f")) != -1 )
+  while ((c = getopt(argc, argv, "l:x:y:w:h:r:b:s:z:t:g:o:f")) != -1 )
   {
     switch (c)
     {
@@ -168,6 +173,13 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
         cvalue = optarg;
         options->terminationGeneration = strtol(cvalue, NULL, 10);
 				//negative values here won't break anything, so no reason to check. Maybe use unsigned val and make 0 the unlimited marker?
+        break;
+      case 'o':
+        if (strlen(optarg) <= MAX_FILENAME_LENGTH)
+          sprintf(options->outputFile, "%s", optarg);
+        else
+          puts("Output filename too long!");
+        break;
       case 'z': //sets the SyncToScreen rate.
         cvalue = optarg;
         int rate = strtol(cvalue, NULL, 10);
@@ -198,6 +210,7 @@ char ParseArgs(LifeArgOptions_t *options, int argc, char **argv)
           fprintf (stderr,
             "Unknown option character `\\x%x'.\n",
             optopt);
+        break;
       default:
         puts("What's going on in here?!?!");
         break;

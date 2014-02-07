@@ -9,4 +9,8 @@
 Returns 1 on success, 0 otherwise. */
 char LoadLifeWorld(LifeWorldBuffer_t *dest, const char *file, char bCenter);
 
+/* Saves the entire content of the world buffer to a plaintext file. 
+Returns 1 on success, 0 otherwise. */
+char SaveLifeWorld(const char *file, LifeWorldBuffer_t *source);
+
 #endif
