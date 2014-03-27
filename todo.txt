@@ -1,9 +1,6 @@
 Document to keep track of feature ideas and prioritization.
 -----------------------------------------------------------
 
-High:
-Output more useful information on term, gens/s, frames/s, generation, time elapsed.
-
 Toggleable - render active "regions" as other-colored squares behind the cells.
 
 Low:
