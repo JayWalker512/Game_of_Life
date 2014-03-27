@@ -188,65 +188,67 @@ void ThreadLifeMain(void *worldContext)
 
   while (context->bRunning)
   {
-		SDL_LockMutex(context->lock);
-		if (bGotWork == 1)
-		{
-			bGotWork = 0;
-			context->numThreadsWorking--;
-		}
+		if (0 == SDL_LockMutex(context->lock))
+    {
+  		if (bGotWork == 1)
+  		{
+  			bGotWork = 0;
+  			context->numThreadsWorking--;
+  		}
 
-		if (bGotWork == 0 &&
-				context->numThreadsWorking == 0 && 
-				StackIsEmpty(context->simBlockQueue))
-		{
-			//if we're swapping, that's a generation! Update stats:
-			UpdateLifeStats(context);
-			SwapThreadedLifeContextGenerationPointers(context);
-			ClearDirtyRegionBuffer(context->backRegions, 0); //0 means null, 1 means simulate
+  		if (bGotWork == 0 &&
+  				context->numThreadsWorking == 0 && 
+  				StackIsEmpty(context->simBlockQueue))
+  		{
+  			//if we're swapping, that's a generation! Update stats:
+  			UpdateLifeStats(context);
+  			SwapThreadedLifeContextGenerationPointers(context);
+  			ClearDirtyRegionBuffer(context->backRegions, 0); //0 means null, 1 means simulate
 
-			if (context->lifeStats.totalGenerations == context->terminationGeneration)
-				context->bRunning = 0;
+  			if (context->lifeStats.totalGenerations == context->terminationGeneration)
+  				context->bRunning = 0;
 
-			//any changes to world state go here before building the work queue
-			if (context->bRandomize)
-			{
-				context->bRandomize = 0;
-				RandomizeWorldStateBinary(context); //this isn't a very good func name/setup...
-				ClearDirtyRegionBuffer(context->frontRegions, 1);
-			}
+  			//any changes to world state go here before building the work queue
+  			if (context->bRandomize)
+  			{
+  				context->bRandomize = 0;
+  				RandomizeWorldStateBinary(context); //this isn't a very good func name/setup...
+  				ClearDirtyRegionBuffer(context->frontRegions, 1);
+  			}
 
-			if (context->bReloadFile)
-			{
-				context->bReloadFile = 0;
-				ClearWorldBuffer(context->front, 0);
-				LoadLifeWorld(context->front, context->lifeFile, 1);
-				ClearDirtyRegionBuffer(context->frontRegions, 1);
-			}
+  			if (context->bReloadFile)
+  			{
+  				context->bReloadFile = 0;
+  				ClearWorldBuffer(context->front, 0);
+  				LoadLifeWorld(context->front, context->lifeFile, 1);
+  				ClearDirtyRegionBuffer(context->frontRegions, 1);
+  			}
 
-			/*if (context->bClearWorld)
-			{
-				context->bClearWorld = 0;
-				ClearWorldBuffer(context->front, 0);
-				ClearWorldBuffer(context->back, 0);
-				ClearDirtyRegionBuffer(context->frontRegions, 1);
-				ClearDirtyRegionBuffer(context->frontRegions, 0);
-			}*/
+  			/*if (context->bClearWorld)
+  			{
+  				context->bClearWorld = 0;
+  				ClearWorldBuffer(context->front, 0);
+  				ClearWorldBuffer(context->back, 0);
+  				ClearDirtyRegionBuffer(context->frontRegions, 1);
+  				ClearDirtyRegionBuffer(context->frontRegions, 0);
+  			}*/
 
-      BuildSimBlockQueues(context->simBlockQueue, context->frontRegions);
-		}
-	
-		int jobsPulled = 0;
-		while (jobsPulled < localQueueSize && !StackIsEmpty(context->simBlockQueue))
-		{
-			StackPush(localSimBlockQueue, StackPop(context->simBlockQueue));
-			jobsPulled++;
-			bGotWork = 1;
-		}
-		if (!StackIsEmpty(localSimBlockQueue))
-			context->numThreadsWorking++;
+        BuildSimBlockQueues(context->simBlockQueue, context->frontRegions);
+  		}
+  	
+  		int jobsPulled = 0;
+  		while (jobsPulled < localQueueSize && !StackIsEmpty(context->simBlockQueue))
+  		{
+  			StackPush(localSimBlockQueue, StackPop(context->simBlockQueue));
+  			jobsPulled++;
+  			bGotWork = 1;
+  		}
+  		if (!StackIsEmpty(localSimBlockQueue))
+  			context->numThreadsWorking++;
 
-		jobsPulled = 0; //just to make sure it's reinitialized. It never goes out of scope so once set will stay, right?
-		SDL_UnlockMutex(context->lock);
+  		jobsPulled = 0; //just to make sure it's reinitialized. It never goes out of scope so once set will stay, right?
+		  SDL_UnlockMutex(context->lock);
+    }
 
 		if (!StackIsEmpty(localSimBlockQueue))
     {
