@@ -7,7 +7,7 @@ BUILDOBJS=main.o binary.o dirtyregion.o graphics.o input.o lifegraphics.o loadfi
 all: gameoflife
 
 gameoflife: main.o binary.o dirtyregion.o graphics.o input.o lifegraphics.o loadfile.o stack.o threadlife.o vector3.o
-	$(CC) $(BUILDOBJS) -o gameoflife $(LDFLAGS)
+	$(CC) $(BUILDOBJS) -o ../gameoflife $(LDFLAGS)
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c main.c
