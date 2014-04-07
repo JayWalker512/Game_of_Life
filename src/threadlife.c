@@ -220,6 +220,7 @@ void ThreadLifeMain(void *worldContext)
 				context->bReloadFile = 0;
 				ClearWorldBuffer(context->front, 0);
 				LoadLifeWorld(context->front, context->lifeFile, 1);
+        InitializeLifeStats(context);
 				ClearDirtyRegionBuffer(context->frontRegions, 1);
 			}
 
