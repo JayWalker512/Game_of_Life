@@ -7,6 +7,8 @@ The aim of this program is to be able to simulate many generations of life very 
 
 This iteration makes use of only two threads. Main thread renders the world to the screen and handles input, the other thread runs the simulation. 
 
+This build was released on April 7, 2014.
+
 User Input
 ----------
 
