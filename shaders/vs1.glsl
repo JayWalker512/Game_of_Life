@@ -1,5 +1,5 @@
-#version 330
-layout(location = 0) in vec4 position;
+#version 130
+attribute vec4 position;
 uniform vec4 scale;
 uniform vec4 translation;
 uniform vec4 rgb;

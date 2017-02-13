@@ -109,10 +109,10 @@ GLuint BuildShaderProgram(const char *vsPath, const char *fsPath)
 	glGetProgramiv(tempProgram, GL_LINK_STATUS, &status);
 	if (status == GL_FALSE)
 	{
-		GLint infoLogLength;
+		GLint infoLogLength = 4096;
     glGetProgramiv(tempProgram, GL_INFO_LOG_LENGTH, &infoLogLength);
 	
-		GLchar strInfoLog[4096];
+		GLchar strInfoLog[infoLogLength];
 		glGetProgramInfoLog(tempProgram, infoLogLength, NULL, strInfoLog);
 		printf("Shader linker failure: %s\n", strInfoLog);
 		return -1;
@@ -146,6 +146,9 @@ GLuint CreateShader(GLenum eShaderType, const char *strShaderFile)
 	
 	GLuint shader = glCreateShader(eShaderType);
 	const char *ss = shaderSource;
+
+	//patch to fix compile error on Intel HD 5300
+	glBindAttribLocation(shader, 0, "position"); 
 	glShaderSource(shader, 1, &ss, NULL);
 	
 	glCompileShader(shader);
@@ -154,10 +157,10 @@ GLuint CreateShader(GLenum eShaderType, const char *strShaderFile)
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 	if (status == GL_FALSE)
 	{
-		GLint infoLogLength;
+		GLint infoLogLength = 4096;
   	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
   
-  	GLchar strInfoLog[4096];
+  	GLchar strInfoLog[infoLogLength];
   	glGetShaderInfoLog(shader, infoLogLength, NULL, strInfoLog);
         
 		char strShaderType[16];

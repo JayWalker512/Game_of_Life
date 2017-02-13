@@ -1,0 +1,20 @@
+Document to keep track of feature ideas, bugs, and prioritization.
+-----------------------------------------------------------
+
+------------
+Features
+------------
+
+High:
+Toggleable - render active "regions" as other-colored squares behind the cells.
+
+Low:
+--help flag output explaining the various CLI flag options
+
+Support different edge effects: toroidal, dead edge, edge growth.
+
+-------------
+Bugs
+-------------
+
+Running the binary from a working dir other than the one the binary is located in causes a segfault (caused because the binary can no longer find its glsl shaders).
