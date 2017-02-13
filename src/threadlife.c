@@ -178,9 +178,10 @@ static void UpdateLifeStats(ThreadedLifeContext_t *context)
 
 /* PUBLIC FUNCTIONS BEGIN HERE */
 
-void ThreadLifeMain(void *worldContext)
+void ThreadLifeMain(void *tData)
 {
-  ThreadedLifeContext_t *context = worldContext;
+  ThreadData_t *threadData = tData;
+  ThreadedLifeContext_t *context = threadData->worldContext;
 
   const int localQueueSize = 32;
 	int bGotWork = 0;

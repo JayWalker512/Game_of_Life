@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=c99 -Wall -Wextra -pedantic -O3 -D_GNU_SOURCE -I/usr/include/GL `sdl2-config --cflags`
+CFLAGS=-std=c99 -Wall -Wextra -pedantic -g -O3 -D_GNU_SOURCE -I/usr/include/GL `sdl2-config --cflags`
 LDFLAGS=`sdl2-config --libs` -lGL -lGLEW -lm
 OBJDIR=obj/
 BUILDOBJS=main.o binary.o dirtyregion.o graphics.o input.o lifegraphics.o loadfile.o stack.o threadlife.o vector3.o

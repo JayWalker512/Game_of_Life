@@ -53,7 +53,12 @@ typedef struct ThreadedLifeContext_s {
 	SDL_mutex *statLock;
 } ThreadedLifeContext_t;
 
-void ThreadLifeMain(void *worldContext);
+typedef struct ThreadData_s {
+	unsigned int threadId;
+	ThreadedLifeContext_t *worldContext;
+} ThreadData_t;
+
+void ThreadLifeMain(void *tData);
 
 //This func has an awful lot of sparse params, maybe combine in a "ThreadLifeContextOptions" struct?
 ThreadedLifeContext_t *CreateThreadedLifeContext(LifeWorldDim_t w, LifeWorldDim_t h,

@@ -67,12 +67,18 @@ int main(int argc, char **argv)
 
   //create and start the simulation thread(s).
   SDL_Thread *lifeThread[options.numThreads]; 
+  ThreadData_t *threadData[options.numThreads];
   for (int i = 0; i < options.numThreads; i++)
   {
     char threadTitle[10] = "SimThread."; //. is the spot where our ID goes
     threadTitle[9] = i + 65;
+
+    threadData[i] = malloc(sizeof(ThreadData_t));
+    threadData[i]->threadId = i;
+    threadData[i]->worldContext = worldContext;
+
     lifeThread[i] = SDL_CreateThread((SDL_ThreadFunction)&ThreadLifeMain, 
-      threadTitle, worldContext);
+      threadTitle, threadData[i]);
     if (lifeThread[i] == NULL)
     {
       printf("Couldn't create thread!\n");
@@ -103,6 +109,11 @@ int main(int argc, char **argv)
 
   if (options.outputFile[0] != '\0')
     SaveLifeWorld(options.outputFile, worldContext->front);
+
+  //destroy malloc'd objects
+  for (int i = 0; i < options.numThreads; i++) {
+  	free(threadData[i]);
+  }
 
   DestroyThreadedLifeContext(worldContext);
   DestroyLifeGameGraphicsContext(graphicsContext);
