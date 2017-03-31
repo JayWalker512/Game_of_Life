@@ -478,14 +478,14 @@ char NumLiveNeighbors(LifeWorldDim_t x, LifeWorldDim_t y, LifeWorldBuffer_t *wor
   //this is an optimization that avoids branching. 
   //numLive is incremented if the value returned from GetCellState AND'ed with 1 yields 1.
   //in this way, the LSB of each cell signifies being alive or dead.
-  numLive += ( GetCellState(x - 1, y - 1, world) && 0x01 );
-  numLive += ( GetCellState(x, y - 1, world) && 0x01 );
-  numLive += ( GetCellState(x + 1, y - 1, world) && 0x01 );
-  numLive += ( GetCellState(x - 1, y, world) && 0x01 );
-  numLive += ( GetCellState(x + 1, y, world) && 0x01 );
-  numLive += ( GetCellState(x - 1, y + 1, world) && 0x01 );
-  numLive += ( GetCellState(x, y + 1, world) && 0x01);
-  numLive += ( GetCellState(x + 1, y + 1, world) && 0x01);
+  numLive += ( GetCellState(x - 1, y - 1, world) & 0x01 );
+  numLive += ( GetCellState(x, y - 1, world) & 0x01 );
+  numLive += ( GetCellState(x + 1, y - 1, world) & 0x01 );
+  numLive += ( GetCellState(x - 1, y, world) & 0x01 );
+  numLive += ( GetCellState(x + 1, y, world) & 0x01 );
+  numLive += ( GetCellState(x - 1, y + 1, world) & 0x01 );
+  numLive += ( GetCellState(x, y + 1, world) & 0x01);
+  numLive += ( GetCellState(x + 1, y + 1, world) & 0x01);
 
   return numLive;
 }
